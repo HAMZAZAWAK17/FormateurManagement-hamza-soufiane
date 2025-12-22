@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
+import Formations from './pages/Formations';
+import AjouterFormation from './pages/AjouterFormation';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -15,6 +17,21 @@ const ProtectedRoute = ({ children }) => {
   );
 
   if (!user) return <Navigate to="/login" />;
+
+  return children;
+};
+
+const AdminRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
+      <div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+    </div>
+  );
+
+  if (!user) return <Navigate to="/login" />;
+  if (user.role !== 'admin') return <Navigate to="/dashboard" />;
 
   return children;
 };
@@ -35,7 +52,30 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/" element={<Navigate to="/login" />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/formations"
+              element={
+                <ProtectedRoute>
+                  <Formations />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/formations/ajouter"
+              element={
+                <AdminRoute>
+                  <AjouterFormation />
+                </AdminRoute>
+              }
+            />
           </Routes>
         </div>
       </Router>

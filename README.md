@@ -40,3 +40,8 @@ npm run dev
 - Interface d'authentification moderne et responsive.
 - Gestion des rôles : Admin, Formateur, Assistant.
 - Sécurisation des routes et des mots de passe (Bcrypt + JWT).
+
+## Fonctionnalités (Tâche 2)
+- Interface de gestion des formations (liste et ajout).
+- CRUD formations avec validation des données (backend).
+- Composant Layout réutilisable avec sidebar de navigation.
