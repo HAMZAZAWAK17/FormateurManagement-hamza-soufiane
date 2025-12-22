@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import Formations from './pages/Formations';
 import AjouterFormation from './pages/AjouterFormation';
+import ModifierFormation from './pages/ModifierFormation';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -73,6 +74,14 @@ function App() {
               element={
                 <AdminRoute>
                   <AjouterFormation />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/formations/modifier/:id"
+              element={
+                <AdminRoute>
+                  <ModifierFormation />
                 </AdminRoute>
               }
             />

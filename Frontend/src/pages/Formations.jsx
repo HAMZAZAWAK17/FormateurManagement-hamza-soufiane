@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { BookOpen, Plus, AlertCircle } from 'lucide-react';
+import { BookOpen, Plus, AlertCircle, Edit2, Trash2 } from 'lucide-react';
 import Layout from '../components/Layout';
 
 const Formations = () => {
@@ -9,6 +9,22 @@ const Formations = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+
+    const handleModifier = (id) => {
+        navigate(`/formations/modifier/${id}`);
+    };
+
+    const handleSupprimer = async (id) => {
+        if (window.confirm('Êtes-vous sûr de vouloir supprimer cette formation ?')) {
+            try {
+                await axios.delete(`http://localhost:5000/api/formations/${id}`);
+                setFormations(formations.filter(f => f.id !== id));
+                alert('Formation supprimée avec succès !');
+            } catch (err) {
+                alert('Erreur lors de la suppression de la formation.');
+            }
+        }
+    };
 
     useEffect(() => {
         const fetchFormations = async () => {
@@ -67,18 +83,19 @@ const Formations = () => {
                                     <th className="text-left px-4 py-3 text-slate-400 font-medium">Coût</th>
                                     <th className="text-left px-4 py-3 text-slate-400 font-medium">Objectifs</th>
                                     <th className="text-left px-4 py-3 text-slate-400 font-medium">Programme détaillé</th>
+                                    <th className="text-center px-4 py-3 text-slate-400 font-medium">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
+                                        <td colSpan={7} className="px-4 py-6 text-center text-slate-400">
                                             Chargement des formations...
                                         </td>
                                     </tr>
                                 ) : formations.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="px-4 py-6 text-center text-slate-500">
+                                        <td colSpan={7} className="px-4 py-6 text-center text-slate-500">
                                             Aucune formation pour le moment.
                                         </td>
                                     </tr>
@@ -109,6 +126,26 @@ const Formations = () => {
                                                             </div>
                                                         ))
                                                     }
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <button
+                                                        onClick={() => handleModifier(formation.id)}
+                                                        className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
+                                                        title="Modifier"
+                                                    >
+                                                        <Edit2 className="w-3.5 h-3.5" />
+                                                        Modifier
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleSupprimer(formation.id)}
+                                                        className="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors"
+                                                        title="Supprimer"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                        Supprimer
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
