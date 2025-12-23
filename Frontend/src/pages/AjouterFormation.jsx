@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
@@ -10,8 +11,7 @@ const AjouterFormation = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState(false);
+
     const [formData, setFormData] = useState({
         titre: '',
         nombre_heures: '',
@@ -22,39 +22,24 @@ const AjouterFormation = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        setSuccess(false);
         setIsLoading(true);
 
         try {
-            const response = await axios.post('http://localhost:5000/api/formations', {
+            await axios.post('http://localhost:5000/api/formations', {
                 ...formData,
                 nombre_heures: parseInt(formData.nombre_heures),
                 cout: parseFloat(formData.cout)
             });
 
-            setSuccess(true);
-            setFormData({
-                titre: '',
-                nombre_heures: '',
-                cout: '',
-                objectifs: '',
-                programme_detaille: ''
-            });
-
-            setTimeout(() => {
-                navigate('/formations');
-            }, 2000);
+            toast.success('Formation ajoutée avec succès !');
+            setTimeout(() => navigate('/formations'), 1500);
         } catch (err) {
-            setError(err.response?.data?.message || 'Erreur lors de l\'ajout de la formation.');
+            toast.error(err.response?.data?.message || 'Erreur lors de l\'ajout.');
         } finally {
             setIsLoading(false);
         }
@@ -62,11 +47,11 @@ const AjouterFormation = () => {
 
     if (user?.role !== 'admin') {
         return (
-            <div className="min-h-screen bg-[#0f172a] flex items-center justify-center text-white">
-                <div className="text-center">
+            <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] flex items-center justify-center transition-colors">
+                <div className="text-center p-8 bg-white dark:bg-[#1e293b] rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700">
                     <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold mb-2">Accès refusé</h2>
-                    <p className="text-slate-400">Vous devez être administrateur pour accéder à cette page.</p>
+                    <h2 className="text-2xl font-bold mb-2 text-slate-900 dark:text-white">Accès refusé</h2>
+                    <p className="text-slate-500 dark:text-slate-400">Section réservée aux administrateurs.</p>
                 </div>
             </div>
         );
@@ -74,53 +59,32 @@ const AjouterFormation = () => {
 
     return (
         <Layout>
-            <div className="min-h-screen bg-[#0f172a] text-white p-4 md:p-8">
+            <div className="p-4 md:p-8 space-y-8">
                 <div className="max-w-4xl mx-auto">
                     <div className="flex items-center gap-4 mb-8">
                         <button
-                            onClick={() => navigate('/formations')}
-                            className="p-2 hover:bg-[#1e293b] rounded-xl transition-colors"
+                            onClick={() => navigate(-1)}
+                            className="p-3 bg-white dark:bg-[#1e293b] text-slate-600 dark:text-slate-400 rounded-xl hover:text-blue-600 dark:hover:text-blue-400 shadow-sm border border-slate-200 dark:border-slate-800 transition-all"
                         >
                             <ArrowLeft className="w-6 h-6" />
                         </button>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
-                            Ajouter une Formation
-                        </h1>
+                        <div>
+                            <h1 className="text-4xl font-black text-slate-900 dark:text-white">
+                                Nouvelle <span className="text-emerald-600 dark:text-emerald-400">Formation</span>
+                            </h1>
+                            <p className="text-slate-500 font-medium">Créez un nouveau programme pédagogique</p>
+                        </div>
                     </div>
-
-                    {success && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl flex items-center gap-3 mb-6"
-                        >
-                            <CheckCircle className="text-emerald-500 w-5 h-5 flex-shrink-0" />
-                            <p className="text-emerald-500 text-sm font-semibold">
-                                Formation ajoutée avec succès ! Redirection en cours...
-                            </p>
-                        </motion.div>
-                    )}
-
-                    {error && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center gap-3 mb-6"
-                        >
-                            <AlertCircle className="text-red-500 w-5 h-5 flex-shrink-0" />
-                            <p className="text-red-500 text-sm font-semibold">{error}</p>
-                        </motion.div>
-                    )}
 
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-[#1e293b]/50 backdrop-blur-2xl p-8 rounded-3xl border border-[#334155]/50"
+                        className="bg-white dark:bg-[#1e293b]/50 backdrop-blur-xl p-8 rounded-[2rem] border border-slate-200 dark:border-[#334155]/50 shadow-xl shadow-slate-200/50 dark:shadow-none"
                     >
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="group">
-                                <label className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-2">
-                                    <BookOpen className="w-4 h-4 text-blue-400" />
+                        <form onSubmit={handleSubmit} className="space-y-8">
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
+                                    <BookOpen className="w-4 h-4 text-blue-500" />
                                     Titre de la formation
                                 </label>
                                 <input
@@ -128,17 +92,16 @@ const AjouterFormation = () => {
                                     name="titre"
                                     value={formData.titre}
                                     onChange={handleChange}
-                                    className="w-full bg-[#0f172a]/50 border border-[#334155]/50 text-white px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all"
-                                    placeholder="Ex: Formation en Développement Web"
+                                    className="w-full bg-slate-50 dark:bg-[#0f172a]/50 border border-slate-200 dark:border-[#334155]/50 text-slate-900 dark:text-white px-5 py-4 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                    placeholder="Ex: Expert React & Next.js"
                                     required
                                 />
                             </div>
 
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="group">
-                                    <label className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-2">
-                                        <Clock className="w-4 h-4 text-emerald-400" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
+                                        <Clock className="w-4 h-4 text-emerald-500" />
                                         Nombre d'heures
                                     </label>
                                     <input
@@ -146,25 +109,24 @@ const AjouterFormation = () => {
                                         name="nombre_heures"
                                         value={formData.nombre_heures}
                                         onChange={handleChange}
-                                        className="w-full bg-[#0f172a]/50 border border-[#334155]/50 text-white px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all"
+                                        className="w-full bg-slate-50 dark:bg-[#0f172a]/50 border border-slate-200 dark:border-[#334155]/50 text-slate-900 dark:text-white px-5 py-4 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
                                         placeholder="Ex: 40"
                                         min="1"
                                         required
                                     />
                                 </div>
-
-                                <div className="group">
-                                    <label className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-2">
-                                        <DollarSign className="w-4 h-4 text-yellow-400" />
-                                        Coût (€)
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
+                                        <DollarSign className="w-4 h-4 text-amber-500" />
+                                        Coût total (€)
                                     </label>
                                     <input
                                         type="number"
                                         name="cout"
                                         value={formData.cout}
                                         onChange={handleChange}
-                                        className="w-full bg-[#0f172a]/50 border border-[#334155]/50 text-white px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all"
-                                        placeholder="Ex: 500"
+                                        className="w-full bg-slate-50 dark:bg-[#0f172a]/50 border border-slate-200 dark:border-[#334155]/50 text-slate-900 dark:text-white px-5 py-4 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                        placeholder="0.00"
                                         min="0"
                                         step="0.01"
                                         required
@@ -172,56 +134,56 @@ const AjouterFormation = () => {
                                 </div>
                             </div>
 
-                            <div className="group">
-                                <label className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-2">
-                                    <Target className="w-4 h-4 text-red-400" />
-                                    Objectifs
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
+                                    <Target className="w-4 h-4 text-red-500" />
+                                    Objectifs pédagogiques
                                 </label>
                                 <textarea
                                     name="objectifs"
                                     value={formData.objectifs}
                                     onChange={handleChange}
                                     rows="4"
-                                    className="w-full bg-[#0f172a]/50 border border-[#334155]/50 text-white px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all resize-none"
-                                    placeholder="Décrivez les objectifs pédagogiques de la formation..."
+                                    className="w-full bg-slate-50 dark:bg-[#0f172a]/50 border border-slate-200 dark:border-[#334155]/50 text-slate-900 dark:text-white px-5 py-4 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all resize-none"
+                                    placeholder="Qu'est-ce que l'étudiant saura faire ?"
                                     required
                                 />
                             </div>
 
-                            <div className="group">
-                                <label className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-2">
-                                    <FileText className="w-4 h-4 text-indigo-400" />
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
+                                    <FileText className="w-4 h-4 text-indigo-500" />
                                     Programme détaillé
                                 </label>
                                 <textarea
                                     name="programme_detaille"
                                     value={formData.programme_detaille}
                                     onChange={handleChange}
-                                    rows="8"
-                                    className="w-full bg-[#0f172a]/50 border border-[#334155]/50 text-white px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all resize-none"
-                                    placeholder="Détaillez le programme de la formation, les modules, les sujets abordés..."
+                                    rows="6"
+                                    className="w-full bg-slate-50 dark:bg-[#0f172a]/50 border border-slate-200 dark:border-[#334155]/50 text-slate-900 dark:text-white px-5 py-4 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all resize-none"
+                                    placeholder="Détaillez les modules de la formation..."
                                     required
                                 />
                             </div>
 
-                            <div className="flex gap-4 pt-4">
+                            <div className="flex flex-col sm:flex-row gap-4 pt-4">
                                 <button
                                     type="button"
-                                    onClick={() => navigate('/dashboard')}
-                                    className="flex-1 bg-[#334155] hover:bg-[#475569] text-white font-bold py-3 rounded-xl transition-all"
+                                    onClick={() => navigate(-1)}
+                                    className="flex-1 bg-slate-100 dark:bg-[#334155] hover:bg-slate-200 dark:hover:bg-[#475569] text-slate-700 dark:text-white font-bold py-4 rounded-2xl transition-all"
                                 >
                                     Annuler
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-600/25 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl shadow-xl shadow-emerald-600/30 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                                 >
                                     {isLoading ? (
-                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
                                     ) : (
                                         <>
-                                            <span>Ajouter la formation</span>
+                                            <span>Enregistrer la formation</span>
                                             <CheckCircle className="w-5 h-5" />
                                         </>
                                     )}

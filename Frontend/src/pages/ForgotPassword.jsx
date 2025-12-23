@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
@@ -20,9 +21,12 @@ const ForgotPassword = () => {
         setIsLoading(true);
         try {
             await axios.post('http://localhost:5000/api/auth/verify-email', { email });
+            toast.success('Email vérifié ! Choisissez un nouveau mot de passe.');
             setStep(2);
         } catch (err) {
-            setError(err.response?.data?.message || 'Email non trouvé');
+            const msg = err.response?.data?.message || 'Email non trouvé';
+            toast.error(msg);
+            setError(msg);
         } finally {
             setIsLoading(false);
         }
@@ -38,9 +42,11 @@ const ForgotPassword = () => {
         setIsLoading(true);
         try {
             await axios.post('http://localhost:5000/api/auth/reset-password', { email, newPassword });
+            toast.success('Mot de passe réinitialisé avec succès !');
             setSuccess('Mot de passe réinitialisé avec succès !');
             setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
+            toast.error('Erreur lors de la réinitialisation');
             setError('Erreur lors de la réinitialisation');
         } finally {
             setIsLoading(false);
@@ -74,19 +80,7 @@ const ForgotPassword = () => {
                         </p>
                     </div>
 
-                    {error && (
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center gap-3 mb-6">
-                            <AlertCircle className="text-red-500 w-5 h-5 flex-shrink-0" />
-                            <p className="text-red-500 text-sm font-medium">{error}</p>
-                        </motion.div>
-                    )}
 
-                    {success && (
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl flex items-center gap-3 mb-6">
-                            <CheckCircle2 className="text-emerald-500 w-5 h-5 flex-shrink-0" />
-                            <p className="text-emerald-500 text-sm font-medium">{success}</p>
-                        </motion.div>
-                    )}
 
                     {step === 1 ? (
                         <form onSubmit={handleVerifyEmail} className="space-y-6">

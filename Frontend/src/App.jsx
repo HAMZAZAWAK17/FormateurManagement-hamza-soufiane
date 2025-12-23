@@ -1,11 +1,15 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext.jsx';
+import { Toaster } from 'react-hot-toast';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import Formations from './pages/Formations';
 import AjouterFormation from './pages/AjouterFormation';
 import ModifierFormation from './pages/ModifierFormation';
+import AjouterFormateur from './pages/AjouterFormateur';
+import Formateurs from './pages/Formateurs';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -39,56 +43,98 @@ const AdminRoute = ({ children }) => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/formations"
-              element={
-                <ProtectedRoute>
-                  <Formations />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/formations/ajouter"
-              element={
-                <AdminRoute>
-                  <AjouterFormation />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/formations/modifier/:id"
-              element={
-                <AdminRoute>
-                  <ModifierFormation />
-                </AdminRoute>
-              }
-            />
-          </Routes>
-        </div>
-      </Router>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#1e293b',
+                color: '#fff',
+                border: '1px solid #334155',
+                borderRadius: '12px',
+              },
+              success: {
+                iconTheme: {
+                  primary: '#10b981',
+                  secondary: '#fff',
+                },
+              },
+              error: {
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: '#fff',
+                },
+              },
+            }}
+          />
+          <div className="App">
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/formations"
+                element={
+                  <ProtectedRoute>
+                    <Formations />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/formations/ajouter"
+                element={
+                  <AdminRoute>
+                    <AjouterFormation />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/formations/modifier/:id"
+                element={
+                  <AdminRoute>
+                    <ModifierFormation />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/formateurs/ajouter"
+                element={
+                  <AdminRoute>
+                    <AjouterFormateur />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/formateurs"
+                element={
+                  <ProtectedRoute>
+                    <Formateurs />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </div>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

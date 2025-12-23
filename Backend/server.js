@@ -5,6 +5,7 @@ import { testConnection } from './config/database.js';
 
 import authRoutes from './routes/authRoutes.js';
 import formationsRoutes from './routes/formationsRoutes.js';
+import formateurRoutes from './routes/formateurRoutes.js';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/formations', formationsRoutes);
+app.use('/api/formateurs', formateurRoutes);
 
 // Route de test
 app.get('/', (req, res) => {

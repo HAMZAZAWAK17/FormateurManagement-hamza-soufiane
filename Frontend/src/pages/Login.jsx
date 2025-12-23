@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
@@ -19,8 +20,10 @@ const Login = () => {
 
         const result = await login(email, password);
         if (result.success) {
+            toast.success('Connexion réussie !');
             navigate('/dashboard');
         } else {
+            toast.error(result.message);
             setError(result.message);
         }
         setIsLoading(false);
@@ -47,16 +50,6 @@ const Login = () => {
                         <p className="text-slate-400 font-medium">Connectez-vous à votre espace formation</p>
                     </div>
 
-                    {error && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center gap-3 mb-6"
-                        >
-                            <AlertCircle className="text-red-500 w-5 h-5 flex-shrink-0" />
-                            <p className="text-red-500 text-sm font-semibold">{error}</p>
-                        </motion.div>
-                    )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="group space-y-2">

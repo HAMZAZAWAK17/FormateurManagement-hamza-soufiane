@@ -8,8 +8,6 @@
 
 body {
   margin: 0;
-  background-color: #0f172a;
-  color: white;
 }
 
 /* Custom styles for glassmorphism and animations */
@@ -25,6 +23,13 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.1; }
-  50% { opacity: 0.3; }
+
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
 }

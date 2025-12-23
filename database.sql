@@ -58,3 +58,15 @@ INSERT INTO formations (titre, nombre_heures, cout, objectifs, programme_detaill
 );
 
 -- Fonctionnalité 3 :
+-- Table des formateurs
+CREATE TABLE IF NOT EXISTS formateurs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    utilisateur_id INT DEFAULT NULL,
+    nom VARCHAR(100) NOT NULL,
+    prenom VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    mots_cles TEXT NOT NULL, -- Compétences caractérisées par des mots clés
+    remarques TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id) ON DELETE SET NULL
+);
