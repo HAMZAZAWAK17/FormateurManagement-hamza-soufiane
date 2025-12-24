@@ -10,6 +10,9 @@ import AjouterFormation from './pages/AjouterFormation';
 import ModifierFormation from './pages/ModifierFormation';
 import AjouterFormateur from './pages/AjouterFormateur';
 import Formateurs from './pages/Formateurs';
+import Entreprises from './pages/Entreprises';
+import AjouterEntreprise from './pages/AjouterEntreprise';
+import ModifierEntreprise from './pages/ModifierEntreprise';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -127,6 +130,30 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Formateurs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/entreprises"
+                element={
+                  <ProtectedRoute>
+                    <Entreprises />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/entreprises/ajouter"
+                element={
+                  <ProtectedRoute>
+                    <AjouterEntreprise />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/entreprises/modifier/:id"
+                element={
+                  <ProtectedRoute>
+                    <ModifierEntreprise />
                   </ProtectedRoute>
                 }
               />

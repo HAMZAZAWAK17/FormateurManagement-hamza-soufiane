@@ -70,3 +70,15 @@ CREATE TABLE IF NOT EXISTS formateurs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id) ON DELETE SET NULL
 );
+
+-- Fonctionnalité 4 :
+-- Table des entreprises
+CREATE TABLE IF NOT EXISTS entreprises (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nom VARCHAR(255) NOT NULL,
+    adresse TEXT NOT NULL,
+    telephone VARCHAR(20) NOT NULL,
+    url VARCHAR(255),
+    email VARCHAR(150) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

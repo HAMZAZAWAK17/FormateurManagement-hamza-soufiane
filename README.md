@@ -45,3 +45,15 @@ npm run dev
 - Interface de gestion des formations (liste et ajout).
 - CRUD formations avec validation des données (backend).
 - Composant Layout réutilisable avec sidebar de navigation.
+
+## Fonctionnalités (Tâche 3)
+- Interface de gestion des formateurs (liste et ajout).
+- CRUD formateurs avec mots-clés et remarques.
+- Validation des données et gestion des compétences.
+- Accès réservé aux administrateurs.
+
+## Fonctionnalités (Tâche 4)
+- Interface de gestion des entreprises clientes (liste et ajout).
+- CRUD entreprises avec coordonnées complètes (nom, adresse, téléphone, email, URL).
+- Validation des formats email et téléphone.
+- Accès pour Admin et Assistant.
