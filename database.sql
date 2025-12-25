@@ -82,3 +82,31 @@ CREATE TABLE IF NOT EXISTS entreprises (
     email VARCHAR(150) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Fonctionnalité 5 :
+-- Table des planifications de formations
+CREATE TABLE IF NOT EXISTS planifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    formation_id INT NOT NULL,
+    formateur_id INT NOT NULL,
+    entreprise_id INT NOT NULL,
+    date_debut DATE NOT NULL,
+    date_fin DATE NOT NULL,
+    horaire_debut TIME NOT NULL,
+    horaire_fin TIME NOT NULL,
+    statut ENUM('planifiee', 'en_cours', 'terminee', 'annulee') DEFAULT 'planifiee',
+    remarques TEXT,
+    created_by INT NOT NULL, -- ID de l'admin ou assistant qui a créé la planification
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (formation_id) REFERENCES formations(id) ON DELETE CASCADE,
+    FOREIGN KEY (formateur_id) REFERENCES formateurs(id) ON DELETE CASCADE,
+    FOREIGN KEY (entreprise_id) REFERENCES entreprises(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES utilisateurs(id) ON DELETE CASCADE
+);
+
+-- Index pour améliorer les performances des requêtes
+CREATE INDEX idx_planifications_dates ON planifications(date_debut, date_fin);
+CREATE INDEX idx_planifications_formateur ON planifications(formateur_id);
+CREATE INDEX idx_planifications_entreprise ON planifications(entreprise_id);
+CREATE INDEX idx_planifications_formation ON planifications(formation_id);

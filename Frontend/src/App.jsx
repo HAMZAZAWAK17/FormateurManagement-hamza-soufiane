@@ -13,6 +13,7 @@ import Formateurs from './pages/Formateurs';
 import Entreprises from './pages/Entreprises';
 import AjouterEntreprise from './pages/AjouterEntreprise';
 import ModifierEntreprise from './pages/ModifierEntreprise';
+import Planifications from './pages/Planifications';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -154,6 +155,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ModifierEntreprise />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/planifications"
+                element={
+                  <ProtectedRoute>
+                    <Planifications />
                   </ProtectedRoute>
                 }
               />

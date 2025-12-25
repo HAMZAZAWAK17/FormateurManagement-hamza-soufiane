@@ -7,6 +7,7 @@ import authRoutes from './routes/authRoutes.js';
 import formationsRoutes from './routes/formationsRoutes.js';
 import formateurRoutes from './routes/formateurRoutes.js';
 import entrepriseRoutes from './routes/entrepriseRoutes.js';
+import planificationRoutes from './routes/planificationRoutes.js';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/formations', formationsRoutes);
 app.use('/api/formateurs', formateurRoutes);
 app.use('/api/entreprises', entrepriseRoutes);
+app.use('/api/planifications', planificationRoutes);
 
 // Route de test
 app.get('/', (req, res) => {
