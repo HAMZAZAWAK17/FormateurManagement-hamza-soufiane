@@ -1,11 +1,11 @@
 import express from 'express';
 import * as planificationController from '../controllers/planificationController.js';
-import authMiddleware from '../middleware/authMiddleware.js';
+import { authenticate } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 // Toutes les routes nécessitent une authentification
-router.use(authMiddleware);
+router.use(authenticate);
 
 // Routes CRUD pour les planifications
 router.post('/', planificationController.createPlanification);

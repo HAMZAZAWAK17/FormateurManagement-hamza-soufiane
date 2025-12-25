@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './Planifications.css';
+import toast from 'react-hot-toast';
+import { Calendar, Plus, Edit2, Trash2, Building2, User, BookOpen } from 'lucide-react';
+import Layout from '../components/Layout';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const API_URL = 'http://localhost:5000/api';
 
@@ -15,7 +18,6 @@ const Planifications = () => {
     const [showModal, setShowModal] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [currentPlanification, setCurrentPlanification] = useState(null);
-    const [filter, setFilter] = useState('all');
     const [stats, setStats] = useState(null);
 
     const [formData, setFormData] = useState({
@@ -59,6 +61,7 @@ const Planifications = () => {
             if (error.response?.status === 401) {
                 navigate('/login');
             }
+            toast.error('Erreur lors du chargement des données');
             setLoading(false);
         }
     };
@@ -81,8 +84,10 @@ const Planifications = () => {
 
             if (editMode) {
                 await axios.put(`${API_URL}/planifications/${currentPlanification.id}`, formData, config);
+                toast.success('Planification modifiée avec succès !');
             } else {
                 await axios.post(`${API_URL}/planifications`, formData, config);
+                toast.success('Planification créée avec succès !');
             }
 
             setShowModal(false);
@@ -91,9 +96,9 @@ const Planifications = () => {
         } catch (error) {
             console.error('Erreur lors de la sauvegarde:', error);
             if (error.response?.status === 409) {
-                alert('Conflit de disponibilité : ' + error.response.data.message);
+                toast.error('Conflit de disponibilité : ' + error.response.data.message);
             } else {
-                alert('Erreur lors de la sauvegarde de la planification');
+                toast.error('Erreur lors de la sauvegarde de la planification');
             }
         }
     };
@@ -115,18 +120,38 @@ const Planifications = () => {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm('Êtes-vous sûr de vouloir supprimer cette planification ?')) {
-            try {
-                const token = localStorage.getItem('token');
-                await axios.delete(`${API_URL}/planifications/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                fetchData();
-            } catch (error) {
-                console.error('Erreur lors de la suppression:', error);
-                alert('Erreur lors de la suppression de la planification');
-            }
-        }
+        toast((t) => (
+            <div className="flex flex-col gap-3">
+                <p className="text-sm font-medium">Êtes-vous sûr de vouloir supprimer cette planification ?</p>
+                <div className="flex justify-end gap-2">
+                    <button
+                        onClick={() => toast.dismiss(t.id)}
+                        className="px-3 py-1 text-xs bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                    >
+                        Annuler
+                    </button>
+                    <button
+                        onClick={async () => {
+                            toast.dismiss(t.id);
+                            try {
+                                const token = localStorage.getItem('token');
+                                await axios.delete(`${API_URL}/planifications/${id}`, {
+                                    headers: { Authorization: `Bearer ${token}` }
+                                });
+                                fetchData();
+                                toast.success('Planification supprimée avec succès !');
+                            } catch (error) {
+                                console.error('Erreur lors de la suppression:', error);
+                                toast.error('Erreur lors de la suppression');
+                            }
+                        }}
+                        className="px-3 py-1 text-xs bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors"
+                    >
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+        ), { duration: 5000 });
     };
 
     const handleStatusChange = async (id, newStatus) => {
@@ -137,9 +162,10 @@ const Planifications = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             fetchData();
+            toast.success('Statut mis à jour avec succès !');
         } catch (error) {
             console.error('Erreur lors du changement de statut:', error);
-            alert('Erreur lors du changement de statut');
+            toast.error('Erreur lors du changement de statut');
         }
     };
 
@@ -165,222 +191,229 @@ const Planifications = () => {
 
     const getStatusBadge = (statut) => {
         const badges = {
-            'planifiee': { text: 'Planifiée', class: 'status-planifiee' },
-            'en_cours': { text: 'En cours', class: 'status-en-cours' },
-            'terminee': { text: 'Terminée', class: 'status-terminee' },
-            'annulee': { text: 'Annulée', class: 'status-annulee' }
+            'planifiee': { text: 'Planifiée', class: 'bg-blue-600/20 text-blue-400' },
+            'en_cours': { text: 'En cours', class: 'bg-yellow-600/20 text-yellow-400' },
+            'terminee': { text: 'Terminée', class: 'bg-green-600/20 text-green-400' },
+            'annulee': { text: 'Annulée', class: 'bg-red-600/20 text-red-400' }
         };
-        const badge = badges[statut] || { text: statut, class: '' };
-        return <span className={`status-badge ${badge.class}`}>{badge.text}</span>;
+        const badge = badges[statut] || { text: statut, class: 'bg-slate-600/20 text-slate-400' };
+        return <span className={`px-2 py-1 rounded-full text-xs font-semibold ${badge.class}`}>{badge.text}</span>;
     };
 
-    const filteredPlanifications = planifications.filter(p => {
-        if (filter === 'all') return true;
-        return p.statut === filter;
-    });
-
-    if (loading) {
-        return <div className="loading">Chargement...</div>;
-    }
-
     return (
-        <div className="planifications-container">
-            <div className="planifications-header">
-                <div>
-                    <h1>📅 Planification des Formations</h1>
-                    <p className="subtitle">Gérez les planifications de formations avec les formateurs et entreprises</p>
+        <Layout>
+            <div className="p-6 space-y-6">
+                {/* Header Section */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-blue-600/10 flex items-center justify-center">
+                            <Calendar className="w-6 h-6 text-blue-500" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-bold text-white">Planifications</h1>
+                            <p className="text-sm text-slate-400">Gestion des planifications de formations</p>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={openModal}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium text-sm transition-colors"
+                    >
+                        <Plus className="w-4 h-4" />
+                        <span>Nouvelle planification</span>
+                    </button>
                 </div>
-                <button className="btn-primary" onClick={openModal}>
-                    ➕ Nouvelle Planification
-                </button>
-            </div>
 
-            {/* Statistiques */}
-            {stats && (
-                <div className="stats-grid">
-                    <div className="stat-card">
-                        <div className="stat-icon">📊</div>
-                        <div className="stat-info">
-                            <div className="stat-value">{stats.total}</div>
-                            <div className="stat-label">Total</div>
+                {/* Statistiques */}
+                {stats && (
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="bg-[#1e293b] rounded-xl border border-slate-700/50 p-4">
+                            <div className="text-slate-400 text-sm mb-1">Total</div>
+                            <div className="text-2xl font-bold text-white">{stats.total}</div>
+                        </div>
+                        <div className="bg-[#1e293b] rounded-xl border border-slate-700/50 p-4">
+                            <div className="text-slate-400 text-sm mb-1">Planifiées</div>
+                            <div className="text-2xl font-bold text-blue-400">{stats.planifiees}</div>
+                        </div>
+                        <div className="bg-[#1e293b] rounded-xl border border-slate-700/50 p-4">
+                            <div className="text-slate-400 text-sm mb-1">En cours</div>
+                            <div className="text-2xl font-bold text-yellow-400">{stats.en_cours}</div>
+                        </div>
+                        <div className="bg-[#1e293b] rounded-xl border border-slate-700/50 p-4">
+                            <div className="text-slate-400 text-sm mb-1">Terminées</div>
+                            <div className="text-2xl font-bold text-green-400">{stats.terminees}</div>
                         </div>
                     </div>
-                    <div className="stat-card">
-                        <div className="stat-icon">📋</div>
-                        <div className="stat-info">
-                            <div className="stat-value">{stats.planifiees}</div>
-                            <div className="stat-label">Planifiées</div>
-                        </div>
-                    </div>
-                    <div className="stat-card">
-                        <div className="stat-icon">⏳</div>
-                        <div className="stat-info">
-                            <div className="stat-value">{stats.en_cours}</div>
-                            <div className="stat-label">En cours</div>
-                        </div>
-                    </div>
-                    <div className="stat-card">
-                        <div className="stat-icon">✅</div>
-                        <div className="stat-info">
-                            <div className="stat-value">{stats.terminees}</div>
-                            <div className="stat-label">Terminées</div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Filtres */}
-            <div className="filters">
-                <button
-                    className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-                    onClick={() => setFilter('all')}
-                >
-                    Toutes
-                </button>
-                <button
-                    className={`filter-btn ${filter === 'planifiee' ? 'active' : ''}`}
-                    onClick={() => setFilter('planifiee')}
-                >
-                    Planifiées
-                </button>
-                <button
-                    className={`filter-btn ${filter === 'en_cours' ? 'active' : ''}`}
-                    onClick={() => setFilter('en_cours')}
-                >
-                    En cours
-                </button>
-                <button
-                    className={`filter-btn ${filter === 'terminee' ? 'active' : ''}`}
-                    onClick={() => setFilter('terminee')}
-                >
-                    Terminées
-                </button>
-            </div>
-
-            {/* Liste des planifications */}
-            <div className="planifications-grid">
-                {filteredPlanifications.length === 0 ? (
-                    <div className="no-data">
-                        <p>Aucune planification trouvée</p>
-                    </div>
-                ) : (
-                    filteredPlanifications.map(planif => (
-                        <div key={planif.id} className="planification-card">
-                            <div className="card-header">
-                                <h3>{planif.formation_titre}</h3>
-                                {getStatusBadge(planif.statut)}
-                            </div>
-
-                            <div className="card-body">
-                                <div className="info-row">
-                                    <span className="icon">👨‍🏫</span>
-                                    <span><strong>Formateur:</strong> {planif.formateur_prenom} {planif.formateur_nom}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="icon">🏢</span>
-                                    <span><strong>Entreprise:</strong> {planif.entreprise_nom}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="icon">📅</span>
-                                    <span><strong>Période:</strong> {new Date(planif.date_debut).toLocaleDateString('fr-FR')} - {new Date(planif.date_fin).toLocaleDateString('fr-FR')}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="icon">⏰</span>
-                                    <span><strong>Horaires:</strong> {planif.horaire_debut} - {planif.horaire_fin}</span>
-                                </div>
-                                {planif.remarques && (
-                                    <div className="info-row">
-                                        <span className="icon">📝</span>
-                                        <span><strong>Remarques:</strong> {planif.remarques}</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="card-footer">
-                                <div className="status-actions">
-                                    <select
-                                        value={planif.statut}
-                                        onChange={(e) => handleStatusChange(planif.id, e.target.value)}
-                                        className="status-select"
-                                    >
-                                        <option value="planifiee">Planifiée</option>
-                                        <option value="en_cours">En cours</option>
-                                        <option value="terminee">Terminée</option>
-                                        <option value="annulee">Annulée</option>
-                                    </select>
-                                </div>
-                                <div className="card-actions">
-                                    <button
-                                        className="btn-edit"
-                                        onClick={() => handleEdit(planif)}
-                                    >
-                                        ✏️ Modifier
-                                    </button>
-                                    <button
-                                        className="btn-delete"
-                                        onClick={() => handleDelete(planif.id)}
-                                    >
-                                        🗑️ Supprimer
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))
                 )}
+
+                {/* Table Section */}
+                <div className="bg-[#1e293b] rounded-xl border border-slate-700/50 overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="border-b border-slate-700/50">
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Formation</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Formateur</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Entreprise</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Période</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Horaires</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Statut</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-700/30">
+                                <AnimatePresence mode='popLayout'>
+                                    {loading ? (
+                                        <tr>
+                                            <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
+                                                <div className="flex flex-col items-center gap-3">
+                                                    <div className="w-8 h-8 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
+                                                    <span>Chargement des planifications...</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : planifications.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                                                Aucune planification trouvée.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        planifications.map((planif) => (
+                                            <motion.tr
+                                                layout
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0, scale: 0.95 }}
+                                                key={planif.id}
+                                                className="hover:bg-slate-700/20 transition-colors"
+                                            >
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <BookOpen className="w-4 h-4 text-blue-400" />
+                                                        <span className="text-sm font-medium text-white">
+                                                            {planif.formation_titre}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <User className="w-4 h-4 text-slate-400" />
+                                                        <span className="text-sm text-slate-300">
+                                                            {planif.formateur_prenom} {planif.formateur_nom}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <Building2 className="w-4 h-4 text-slate-400" />
+                                                        <span className="text-sm text-slate-300">
+                                                            {planif.entreprise_nom}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-slate-300">
+                                                    {new Date(planif.date_debut).toLocaleDateString('fr-FR')} - {new Date(planif.date_fin).toLocaleDateString('fr-FR')}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-slate-300">
+                                                    {planif.horaire_debut} - {planif.horaire_fin}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <select
+                                                        value={planif.statut}
+                                                        onChange={(e) => handleStatusChange(planif.id, e.target.value)}
+                                                        className="bg-slate-700 text-white text-xs px-2 py-1 rounded border border-slate-600 focus:outline-none focus:border-blue-500"
+                                                    >
+                                                        <option value="planifiee">Planifiée</option>
+                                                        <option value="en_cours">En cours</option>
+                                                        <option value="terminee">Terminée</option>
+                                                        <option value="annulee">Annulée</option>
+                                                    </select>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => handleEdit(planif)}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors"
+                                                        >
+                                                            <Edit2 className="w-3.5 h-3.5" />
+                                                            Modifier
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(planif.id)}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition-colors"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                            Supprimer
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </motion.tr>
+                                        ))
+                                    )}
+                                </AnimatePresence>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             {/* Modal */}
             {showModal && (
-                <div className="modal-overlay" onClick={() => setShowModal(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2>{editMode ? '✏️ Modifier la planification' : '➕ Nouvelle planification'}</h2>
-                            <button className="close-btn" onClick={() => setShowModal(false)}>✕</button>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-[#1e293b] rounded-xl border border-slate-700/50 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="p-6 border-b border-slate-700/50">
+                            <h2 className="text-xl font-bold text-white">
+                                {editMode ? 'Modifier la planification' : 'Nouvelle planification'}
+                            </h2>
                         </div>
 
-                        <form onSubmit={handleSubmit}>
-                            <div className="form-grid">
-                                <div className="form-group">
-                                    <label>Formation *</label>
+                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">Formation *</label>
                                     <select
                                         name="formation_id"
                                         value={formData.formation_id}
                                         onChange={handleInputChange}
                                         required
+                                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
                                     >
                                         <option value="">Sélectionner une formation</option>
                                         {formations.map(f => (
                                             <option key={f.id} value={f.id}>
-                                                {f.titre} ({f.nombre_heures}h - {f.cout}€)
+                                                {f.titre} ({f.nombre_heures}h)
                                             </option>
                                         ))}
                                     </select>
                                 </div>
 
-                                <div className="form-group">
-                                    <label>Formateur *</label>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">Formateur *</label>
                                     <select
                                         name="formateur_id"
                                         value={formData.formateur_id}
                                         onChange={handleInputChange}
                                         required
+                                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
                                     >
                                         <option value="">Sélectionner un formateur</option>
                                         {formateurs.map(f => (
                                             <option key={f.id} value={f.id}>
-                                                {f.prenom} {f.nom} - {f.email}
+                                                {f.prenom} {f.nom}
                                             </option>
                                         ))}
                                     </select>
                                 </div>
 
-                                <div className="form-group">
-                                    <label>Entreprise *</label>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">Entreprise *</label>
                                     <select
                                         name="entreprise_id"
                                         value={formData.entreprise_id}
                                         onChange={handleInputChange}
                                         required
+                                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
                                     >
                                         <option value="">Sélectionner une entreprise</option>
                                         {entreprises.map(e => (
@@ -391,67 +424,79 @@ const Planifications = () => {
                                     </select>
                                 </div>
 
-                                <div className="form-group">
-                                    <label>Date de début *</label>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">Date de début *</label>
                                     <input
                                         type="date"
                                         name="date_debut"
                                         value={formData.date_debut}
                                         onChange={handleInputChange}
                                         required
+                                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
                                     />
                                 </div>
 
-                                <div className="form-group">
-                                    <label>Date de fin *</label>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">Date de fin *</label>
                                     <input
                                         type="date"
                                         name="date_fin"
                                         value={formData.date_fin}
                                         onChange={handleInputChange}
                                         required
+                                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
                                     />
                                 </div>
 
-                                <div className="form-group">
-                                    <label>Horaire de début *</label>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">Horaire de début *</label>
                                     <input
                                         type="time"
                                         name="horaire_debut"
                                         value={formData.horaire_debut}
                                         onChange={handleInputChange}
                                         required
+                                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
                                     />
                                 </div>
 
-                                <div className="form-group">
-                                    <label>Horaire de fin *</label>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">Horaire de fin *</label>
                                     <input
                                         type="time"
                                         name="horaire_fin"
                                         value={formData.horaire_fin}
                                         onChange={handleInputChange}
                                         required
-                                    />
-                                </div>
-
-                                <div className="form-group full-width">
-                                    <label>Remarques</label>
-                                    <textarea
-                                        name="remarques"
-                                        value={formData.remarques}
-                                        onChange={handleInputChange}
-                                        rows="3"
-                                        placeholder="Remarques ou notes supplémentaires..."
+                                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
                                     />
                                 </div>
                             </div>
 
-                            <div className="modal-footer">
-                                <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-300 mb-2">Remarques</label>
+                                <textarea
+                                    name="remarques"
+                                    value={formData.remarques}
+                                    onChange={handleInputChange}
+                                    rows="3"
+                                    placeholder="Remarques ou notes supplémentaires..."
+                                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowModal(false)}
+                                    className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium text-sm transition-colors"
+                                >
                                     Annuler
                                 </button>
-                                <button type="submit" className="btn-primary">
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium text-sm transition-colors"
+                                >
                                     {editMode ? 'Mettre à jour' : 'Créer'}
                                 </button>
                             </div>
@@ -459,7 +504,7 @@ const Planifications = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </Layout>
     );
 };
 
