@@ -9,11 +9,14 @@ import Formations from './pages/Formations';
 import AjouterFormation from './pages/AjouterFormation';
 import ModifierFormation from './pages/ModifierFormation';
 import AjouterFormateur from './pages/AjouterFormateur';
+import ModifierFormateur from './pages/ModifierFormateur';
 import Formateurs from './pages/Formateurs';
 import Entreprises from './pages/Entreprises';
 import AjouterEntreprise from './pages/AjouterEntreprise';
 import ModifierEntreprise from './pages/ModifierEntreprise';
 import Planifications from './pages/Planifications';
+import Accueil from './pages/Accueil';
+import Participants from './pages/Participants';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -76,8 +79,13 @@ function App() {
           />
           <div className="App">
             <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Accueil />} />
+              <Route path="/accueil" element={<Accueil />} />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
+
+              {/* Protected Routes */}
               <Route
                 path="/dashboard"
                 element={
@@ -87,10 +95,10 @@ function App() {
                 }
               />
               <Route
-                path="/"
+                path="/participants"
                 element={
                   <ProtectedRoute>
-                    <Dashboard />
+                    <Participants />
                   </ProtectedRoute>
                 }
               />
@@ -123,6 +131,14 @@ function App() {
                 element={
                   <AdminRoute>
                     <AjouterFormateur />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/formateurs/modifier/:id"
+                element={
+                  <AdminRoute>
+                    <ModifierFormateur />
                   </AdminRoute>
                 }
               />
