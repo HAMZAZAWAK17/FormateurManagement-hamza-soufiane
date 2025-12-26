@@ -93,6 +93,7 @@ const Formations = () => {
                                 <tr className="border-b border-slate-700/50">
                                     <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">ID</th>
                                     <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Titre</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Catégorie</th>
                                     <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Nombre heures</th>
                                     <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Coût</th>
                                     <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Objectifs</th>
@@ -133,6 +134,11 @@ const Formations = () => {
                                                 <td className="px-6 py-4">
                                                     <span className="text-sm font-medium text-white">
                                                         {formation.titre}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className="px-2.5 py-1 text-[10px] font-bold bg-purple-500/10 text-purple-400 rounded-lg border border-purple-500/20 uppercase">
+                                                        {formation.categorie || 'Info'}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-slate-300">

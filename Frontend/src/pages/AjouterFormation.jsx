@@ -17,7 +17,8 @@ const AjouterFormation = () => {
         nombre_heures: '',
         cout: '',
         objectifs: '',
-        programme_detaille: ''
+        programme_detaille: '',
+        categorie: 'Informatique'
     });
 
     const handleChange = (e) => {
@@ -96,6 +97,27 @@ const AjouterFormation = () => {
                                     placeholder="Ex: Expert React & Next.js"
                                     required
                                 />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
+                                    <Target className="w-4 h-4 text-purple-500" />
+                                    Catégorie
+                                </label>
+                                <select
+                                    name="categorie"
+                                    value={formData.categorie}
+                                    onChange={handleChange}
+                                    className="w-full bg-slate-50 dark:bg-[#0f172a]/50 border border-slate-200 dark:border-[#334155]/50 text-slate-900 dark:text-white px-5 py-4 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                    required
+                                >
+                                    <option value="Informatique">Informatique</option>
+                                    <option value="Gestion">Gestion</option>
+                                    <option value="Design">Design</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Langues">Langues</option>
+                                    <option value="Soft Skills">Soft Skills</option>
+                                </select>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

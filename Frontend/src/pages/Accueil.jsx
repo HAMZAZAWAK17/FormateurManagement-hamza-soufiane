@@ -8,10 +8,17 @@ const API_URL = 'http://localhost:5000/api';
 
 const Accueil = () => {
     const [formations, setFormations] = useState([]);
+    const [filteredFormations, setFilteredFormations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showInscriptionModal, setShowInscriptionModal] = useState(false);
     const [selectedFormation, setSelectedFormation] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [filters, setFilters] = useState({
+        categorie: '',
+        ville: '',
+        date: ''
+    });
 
     const [formData, setFormData] = useState({
         nom: '',
@@ -26,16 +33,48 @@ const Accueil = () => {
         fetchFormations();
     }, []);
 
+    useEffect(() => {
+        applyFilters();
+    }, [filters, formations]);
+
     const fetchFormations = async () => {
         try {
-            const response = await axios.get(`${API_URL}/formations`);
+            const response = await axios.get(`${API_URL}/formations/catalogue`);
             setFormations(response.data);
+            setFilteredFormations(response.data);
         } catch (error) {
             console.error('Erreur lors du chargement des formations:', error);
             toast.error('Erreur lors du chargement des formations');
         } finally {
             setLoading(false);
         }
+    };
+
+    const applyFilters = () => {
+        let results = formations;
+
+        if (filters.categorie) {
+            results = results.filter(f => f.categorie === filters.categorie);
+        }
+
+        if (filters.ville) {
+            results = results.filter(f =>
+                f.sessions && f.sessions.some(s => s.lieu && s.lieu.toLowerCase().includes(filters.ville.toLowerCase()))
+            );
+        }
+
+        if (filters.date) {
+            results = results.filter(f =>
+                f.sessions && f.sessions.some(s => s.date_debut && s.date_debut >= filters.date)
+            );
+        }
+
+        setFilteredFormations(results);
+    };
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({ ...prev, [name]: value }));
     };
 
     const handleInputChange = (e) => {
@@ -135,6 +174,52 @@ const Accueil = () => {
                 </div>
             </section>
 
+            {/* Filters Section */}
+            <section className="py-4 px-4 sticky top-[73px] z-30 bg-slate-900/80 backdrop-blur-md border-b border-slate-700/50">
+                <div className="container mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="relative">
+                            <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <select
+                                name="categorie"
+                                value={filters.categorie}
+                                onChange={handleFilterChange}
+                                className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500 appearance-none"
+                            >
+                                <option value="">Toutes les catégories</option>
+                                <option value="Informatique">Informatique</option>
+                                <option value="Gestion">Gestion</option>
+                                <option value="Design">Design</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Langues">Langues</option>
+                                <option value="Soft Skills">Soft Skills</option>
+                            </select>
+                        </div>
+                        <div className="relative">
+                            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <input
+                                type="text"
+                                name="ville"
+                                value={filters.ville}
+                                onChange={handleFilterChange}
+                                placeholder="Filtrer par ville..."
+                                className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                            />
+                        </div>
+                        <div className="relative">
+                            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <input
+                                type="date"
+                                name="date"
+                                value={filters.date}
+                                onChange={handleFilterChange}
+                                className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Formations Grid */}
             <section className="py-8 px-4 pb-20">
                 <div className="container mx-auto">
@@ -142,13 +227,13 @@ const Accueil = () => {
                         <div className="flex justify-center items-center py-20">
                             <div className="w-12 h-12 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
                         </div>
-                    ) : formations.length === 0 ? (
+                    ) : filteredFormations.length === 0 ? (
                         <div className="text-center py-20">
-                            <p className="text-slate-400 text-lg">Aucune formation disponible pour le moment</p>
+                            <p className="text-slate-400 text-lg">Aucune formation ne correspond à vos critères</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {formations.map((formation, index) => (
+                            {filteredFormations.map((formation, index) => (
                                 <motion.div
                                     key={formation.id}
                                     initial={{ opacity: 0, y: 20 }}
@@ -177,6 +262,33 @@ const Accueil = () => {
                                         <p className="text-sm text-slate-400 line-clamp-3">
                                             {formation.objectifs}
                                         </p>
+
+                                        {/* Categorie */}
+                                        <div className="flex items-center gap-2 text-purple-400 text-xs font-bold uppercase tracking-wider">
+                                            <Target className="w-3.5 h-3.5" />
+                                            {formation.categorie || 'SANS CATÉGORIE'}
+                                        </div>
+
+                                        {/* Sessions Info */}
+                                        {formation.sessions && formation.sessions.length > 0 && (
+                                            <div className="pt-2 border-t border-slate-700/50">
+                                                <p className="text-[10px] font-bold text-slate-500 uppercase mb-2">Prochaines sessions :</p>
+                                                <div className="space-y-2">
+                                                    {formation.sessions.slice(0, 2).map((session, idx) => (
+                                                        <div key={idx} className="flex items-center justify-between text-xs">
+                                                            <div className="flex items-center gap-1.5 text-slate-300">
+                                                                <Calendar className="w-3 h-3 text-blue-400" />
+                                                                {new Date(session.date_debut).toLocaleDateString()}
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5 text-slate-300">
+                                                                <MapPin className="w-3 h-3 text-red-400" />
+                                                                {session.lieu || 'TBD'}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* Prix */}
                                         <div className="flex items-center gap-2 text-green-400 font-bold text-2xl">

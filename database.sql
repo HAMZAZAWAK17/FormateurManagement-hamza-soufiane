@@ -24,6 +24,7 @@ VALUES ('Admin', 'System', 'admin@formation.com', '$2a$12$R9h/lIPzHZ7.3m8pkOy6S.
 CREATE TABLE IF NOT EXISTS formations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     titre VARCHAR(255) NOT NULL,
+    categorie VARCHAR(100) DEFAULT 'Informatique',
     nombre_heures INT NOT NULL,
     cout DECIMAL(10, 2) NOT NULL,
     objectifs TEXT NOT NULL,
