@@ -17,6 +17,8 @@ import ModifierEntreprise from './pages/ModifierEntreprise';
 import Planifications from './pages/Planifications';
 import Accueil from './pages/Accueil';
 import Participants from './pages/Participants';
+import EvaluerFormation from './pages/EvaluerFormation';
+import ListeEvaluations from './pages/ListeEvaluations';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -84,6 +86,7 @@ function App() {
               <Route path="/accueil" element={<Accueil />} />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/evaluer" element={<EvaluerFormation />} />
 
               {/* Protected Routes */}
               <Route
@@ -180,6 +183,14 @@ function App() {
                   <ProtectedRoute>
                     <Planifications />
                   </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/evaluations"
+                element={
+                  <AdminRoute>
+                    <ListeEvaluations />
+                  </AdminRoute>
                 }
               />
             </Routes>

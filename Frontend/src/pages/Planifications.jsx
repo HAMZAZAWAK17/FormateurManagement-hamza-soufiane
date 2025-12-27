@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { Calendar, Plus, Edit2, Trash2, Building2, User, BookOpen } from 'lucide-react';
+import { Calendar, Plus, Edit2, Trash2, Building2, User, BookOpen, Link } from 'lucide-react';
 import Layout from '../components/Layout';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -169,6 +169,12 @@ const Planifications = () => {
         }
     };
 
+    const copyEvaluationLink = (planif) => {
+        const link = `${window.location.origin}/evaluer?formationId=${planif.formation_id}&formateurId=${planif.formateur_id}`;
+        navigator.clipboard.writeText(link);
+        toast.success('Lien d\'évaluation copié !');
+    };
+
     const resetForm = () => {
         setFormData({
             formation_id: '',
@@ -332,6 +338,14 @@ const Planifications = () => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => copyEvaluationLink(planif)}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-lg transition-colors"
+                                                            title="Copier le lien d'évaluation"
+                                                        >
+                                                            <Link className="w-3.5 h-3.5" />
+                                                            Test & Lien
+                                                        </button>
                                                         <button
                                                             onClick={() => handleEdit(planif)}
                                                             className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors"

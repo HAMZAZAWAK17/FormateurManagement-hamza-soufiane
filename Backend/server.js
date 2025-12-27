@@ -9,6 +9,7 @@ import formateurRoutes from './routes/formateurRoutes.js';
 import entrepriseRoutes from './routes/entrepriseRoutes.js';
 import planificationRoutes from './routes/planificationRoutes.js';
 import participantRoutes from './routes/participantRoutes.js';
+import evaluationRoutes from './routes/evaluationRoutes.js';
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use('/api/formateurs', formateurRoutes);
 app.use('/api/entreprises', entrepriseRoutes);
 app.use('/api/planifications', planificationRoutes);
 app.use('/api/participants', participantRoutes);
+app.use('/api/evaluations', evaluationRoutes);
 
 // Route de test
 app.get('/', (req, res) => {
