@@ -146,12 +146,26 @@ const Accueil = () => {
                                 <p className="text-xs text-slate-400">Développez vos compétences</p>
                             </div>
                         </div>
-                        <a
-                            href="/login"
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors"
-                        >
-                            Connexion
-                        </a>
+                        <div className="flex items-center gap-3">
+                            <a
+                                href="/statut-demande"
+                                className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors"
+                            >
+                                Statut de ma demande
+                            </a>
+                            <a
+                                href="/inscription-formateur"
+                                className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium transition-colors"
+                            >
+                                Devenir Formateur
+                            </a>
+                            <a
+                                href="/login"
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors"
+                            >
+                                Connexion
+                            </a>
+                        </div>
                     </div>
                 </div>
             </header>

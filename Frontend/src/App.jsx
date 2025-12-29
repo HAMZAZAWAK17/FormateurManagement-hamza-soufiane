@@ -19,6 +19,9 @@ import Accueil from './pages/Accueil';
 import Participants from './pages/Participants';
 import EvaluerFormation from './pages/EvaluerFormation';
 import ListeEvaluations from './pages/ListeEvaluations';
+import InscriptionFormateurExterne from './pages/InscriptionFormateurExterne';
+import GestionDemandesFormateurs from './pages/GestionDemandesFormateurs';
+import StatutDemande from './pages/StatutDemande';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -87,6 +90,8 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/evaluer" element={<EvaluerFormation />} />
+              <Route path="/inscription-formateur" element={<InscriptionFormateurExterne />} />
+              <Route path="/statut-demande" element={<StatutDemande />} />
 
               {/* Protected Routes */}
               <Route
@@ -190,6 +195,14 @@ function App() {
                 element={
                   <AdminRoute>
                     <ListeEvaluations />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/demandes-formateurs"
+                element={
+                  <AdminRoute>
+                    <GestionDemandesFormateurs />
                   </AdminRoute>
                 }
               />

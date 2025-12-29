@@ -3,13 +3,14 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-import { Users, Plus, Edit2, Trash2, Mail, Tag, MessageSquare, Search } from 'lucide-react';
+import { Users, Plus, Edit2, Trash2, Mail, Tag, MessageSquare, Search, Filter, CheckCircle, Clock, XCircle } from 'lucide-react';
 import Layout from '../components/Layout';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Formateurs = () => {
     const [formateurs, setFormateurs] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('tous');
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -64,11 +65,44 @@ const Formateurs = () => {
         ), { duration: 5000 });
     };
 
-    const filteredFormateurs = formateurs.filter(f =>
-        `${f.nom} ${f.prenom}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        f.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        f.mots_cles.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredFormateurs = formateurs.filter(f => {
+        const matchesSearch = `${f.nom} ${f.prenom}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            f.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            f.mots_cles.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesStatus = statusFilter === 'tous' || f.statut === statusFilter;
+
+        return matchesSearch && matchesStatus;
+    });
+
+    const getStatusBadge = (statut) => {
+        switch (statut) {
+            case 'en_attente':
+                return {
+                    icon: Clock,
+                    text: 'En attente',
+                    className: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800'
+                };
+            case 'approuve':
+                return {
+                    icon: CheckCircle,
+                    text: 'Approuvé',
+                    className: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800'
+                };
+            case 'rejete':
+                return {
+                    icon: XCircle,
+                    text: 'Rejeté',
+                    className: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800'
+                };
+            default:
+                return {
+                    icon: CheckCircle,
+                    text: 'Approuvé',
+                    className: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800'
+                };
+        }
+    };
 
     return (
         <Layout>
@@ -98,15 +132,33 @@ const Formateurs = () => {
 
                 {/* Filters Section */}
                 <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-[#1e293b] p-4 rounded-2xl shadow-sm transition-colors duration-300">
-                    <div className="relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                        <input
-                            type="text"
-                            placeholder="Rechercher par nom, email ou compétence..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-200 dark:border-[#334155]/50 text-slate-900 dark:text-white pl-12 pr-4 py-3.5 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400 font-medium"
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Search Bar */}
+                        <div className="relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                            <input
+                                type="text"
+                                placeholder="Rechercher par nom, email ou compétence..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-200 dark:border-[#334155]/50 text-slate-900 dark:text-white pl-12 pr-4 py-3.5 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400 font-medium"
+                            />
+                        </div>
+
+                        {/* Status Filter */}
+                        <div className="relative">
+                            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-200 dark:border-[#334155]/50 text-slate-900 dark:text-white pl-12 pr-4 py-3.5 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium appearance-none cursor-pointer"
+                            >
+                                <option value="tous">Tous les statuts</option>
+                                <option value="approuve">✅ Approuvés</option>
+                                <option value="en_attente">⏳ En attente</option>
+                                <option value="rejete">❌ Rejetés</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -118,6 +170,7 @@ const Formateurs = () => {
                                 <tr className="bg-slate-50 dark:bg-[#1f2937]/50 border-b border-slate-200 dark:border-[#334155]/50">
                                     <th className="px-6 py-5 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Formateur</th>
                                     <th className="px-6 py-5 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Compétences</th>
+                                    <th className="px-6 py-5 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Statut</th>
                                     <th className="px-6 py-5 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Remarques</th>
                                     {user?.role === 'admin' && (
                                         <th className="px-6 py-5 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-center">Actions</th>
@@ -128,7 +181,7 @@ const Formateurs = () => {
                                 <AnimatePresence mode='popLayout'>
                                     {loading ? (
                                         <tr>
-                                            <td colSpan={user?.role === 'admin' ? 4 : 3} className="px-6 py-12 text-center text-slate-400">
+                                            <td colSpan={user?.role === 'admin' ? 5 : 4} className="px-6 py-12 text-center text-slate-400">
                                                 <div className="flex flex-col items-center gap-3">
                                                     <div className="w-8 h-8 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
                                                     <span>Chargement des formateurs...</span>
@@ -137,7 +190,7 @@ const Formateurs = () => {
                                         </tr>
                                     ) : filteredFormateurs.length === 0 ? (
                                         <tr>
-                                            <td colSpan={user?.role === 'admin' ? 4 : 3} className="px-6 py-12 text-center text-slate-500">
+                                            <td colSpan={user?.role === 'admin' ? 5 : 4} className="px-6 py-12 text-center text-slate-500">
                                                 Aucun formateur trouvé.
                                             </td>
                                         </tr>
@@ -179,6 +232,18 @@ const Formateurs = () => {
                                                             </span>
                                                         ))}
                                                     </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {(() => {
+                                                        const badge = getStatusBadge(formateur.statut || 'approuve');
+                                                        const Icon = badge.icon;
+                                                        return (
+                                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border ${badge.className}`}>
+                                                                <Icon className="w-3.5 h-3.5" />
+                                                                {badge.text}
+                                                            </span>
+                                                        );
+                                                    })()}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-start gap-2 max-w-xs">

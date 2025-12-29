@@ -4,16 +4,28 @@ import {
     getAllFormateurs,
     getFormateurById,
     updateFormateur,
-    deleteFormateur
+    deleteFormateur,
+    registerFormateurExterne,
+    getFormateursEnAttente,
+    updateStatutFormateur,
+    checkStatutByEmail
 } from '../controllers/formateurController.js';
 import { authenticate, isAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Toutes les routes pour les formateurs nécessitent une authentification admin ou assistant
-// Mais pour simplifier selon la demande (L'admin ajoute...), on peut restreindre à isAdmin pour la création
+// Routes publiques pour les formateurs externes (Fonctionnalité 9)
+router.post('/register-externe', registerFormateurExterne);
+router.post('/check-statut', checkStatutByEmail);
+
+// Toutes les routes suivantes nécessitent une authentification
 router.use(authenticate);
 
+// Routes pour gérer les demandes de formateurs externes (admin uniquement)
+router.get('/en-attente', isAdmin, getFormateursEnAttente);
+router.patch('/:id/statut', isAdmin, updateStatutFormateur);
+
+// Routes CRUD standards pour les formateurs
 router.post('/', isAdmin, createFormateur);
 router.get('/', getAllFormateurs);
 router.get('/:id', getFormateurById);
