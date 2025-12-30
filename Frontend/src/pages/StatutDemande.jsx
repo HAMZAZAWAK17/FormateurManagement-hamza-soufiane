@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Mail, Search, CheckCircle, XCircle, Clock, User, Tag, Calendar, Key } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import './StatutDemande.css';
 
 const StatutDemande = () => {
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
+    const [role, setRole] = useState('formateur'); // 'formateur' or 'participant'
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [demande, setDemande] = useState(null);
@@ -22,8 +25,12 @@ const StatutDemande = () => {
 
         setLoading(true);
 
+        const apiEndpoint = role === 'formateur'
+            ? 'http://localhost:5000/api/formateurs/check-statut'
+            : 'http://localhost:5000/api/participants/check-statut';
+
         try {
-            const response = await fetch('http://localhost:5000/api/formateurs/check-statut', {
+            const response = await fetch(apiEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -56,12 +63,14 @@ const StatutDemande = () => {
                     className: 'statut-badge statut-attente'
                 };
             case 'approuve':
+            case 'confirme': // Handle 'confirme' for participants if needed, though backend maps it
                 return {
                     icon: <CheckCircle className="statut-icon" />,
                     text: 'Approuvée',
                     className: 'statut-badge statut-approuve'
                 };
             case 'rejete':
+            case 'annule':
                 return {
                     icon: <XCircle className="statut-icon" />,
                     text: 'Rejetée',
@@ -90,11 +99,37 @@ const StatutDemande = () => {
                     </div>
                     <h1>Vérifier le statut de ma demande</h1>
                     <p className="statut-subtitle">
-                        Entrez votre adresse email pour consulter l'état de votre candidature
+                        Consultez l'état de votre candidature ou inscription
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="statut-form">
+                    {/* Role Toggle */}
+                    <div className="flex justify-center mb-6">
+                        <div className="bg-slate-100 p-1 rounded-lg inline-flex">
+                            <button
+                                type="button"
+                                onClick={() => setRole('formateur')}
+                                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${role === 'formateur'
+                                        ? 'bg-white text-blue-600 shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-700'
+                                    }`}
+                            >
+                                Formateur
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setRole('participant')}
+                                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${role === 'participant'
+                                        ? 'bg-white text-blue-600 shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-700'
+                                    }`}
+                            >
+                                Participant
+                            </button>
+                        </div>
+                    </div>
+
                     <div className="form-group">
                         <label htmlFor="email">
                             <Mail className="label-icon" />
@@ -136,7 +171,7 @@ const StatutDemande = () => {
                 {searched && demande && (
                     <div className="demande-result">
                         <div className="result-header">
-                            <h2>Résultat de votre demande</h2>
+                            <h2>Résultat de votre {role === 'participant' ? 'inscription' : 'demande'}</h2>
                             <div className={getStatutBadge(demande.statut).className}>
                                 {getStatutBadge(demande.statut).icon}
                                 {getStatutBadge(demande.statut).text}

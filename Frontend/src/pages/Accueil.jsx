@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
@@ -13,6 +15,8 @@ const Accueil = () => {
     const [showInscriptionModal, setShowInscriptionModal] = useState(false);
     const [selectedFormation, setSelectedFormation] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { user } = useAuth();
+    const navigate = useNavigate();
 
     const [filters, setFilters] = useState({
         categorie: '',
@@ -32,6 +36,18 @@ const Accueil = () => {
     useEffect(() => {
         fetchFormations();
     }, []);
+
+    useEffect(() => {
+        if (user) {
+            console.log("Pré-remplissage avec utilisateur:", user);
+            setFormData(prev => ({
+                ...prev,
+                nom: user.nom || '',
+                prenom: user.prenom || '',
+                email: user.email || '',
+            }));
+        }
+    }, [user, showInscriptionModal]); // Add showInscriptionModal to dependency to refresh when opening
 
     useEffect(() => {
         applyFilters();
@@ -108,10 +124,13 @@ const Accueil = () => {
         setIsSubmitting(true);
 
         try {
+            const token = localStorage.getItem('token');
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
             await axios.post(`${API_URL}/participants/inscrire`, {
                 ...formData,
                 formation_id: selectedFormation.id
-            });
+            }, { headers });
 
             toast.success('Inscription réussie ! Nous vous contacterons bientôt.', {
                 duration: 5000,
@@ -119,6 +138,10 @@ const Accueil = () => {
             });
 
             closeModal();
+
+            if (user && user.role === 'participant') {
+                navigate('/mes-formations');
+            }
         } catch (error) {
             console.error('Erreur lors de l\'inscription:', error);
             if (error.response?.status === 409) {
@@ -152,6 +175,12 @@ const Accueil = () => {
                                 className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors"
                             >
                                 Statut de ma demande
+                            </a>
+                            <a
+                                href="/inscription-participant"
+                                className="px-4 py-2 bg-blue-500 hover:bg-blue-400 text-white rounded-lg text-sm font-medium transition-colors"
+                            >
+                                Devenir Participant
                             </a>
                             <a
                                 href="/inscription-formateur"

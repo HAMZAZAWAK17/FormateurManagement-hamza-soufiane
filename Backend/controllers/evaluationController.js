@@ -78,7 +78,9 @@ export const getAllEvaluations = async (req, res) => {
                 e.*,
                 f.titre as formation_titre,
                 frmt.nom as formateur_nom,
-                frmt.prenom as formateur_prenom
+                frmt.prenom as formateur_prenom,
+                (SELECT nom FROM participants WHERE email = e.participant_email LIMIT 1) as participant_nom,
+                (SELECT prenom FROM participants WHERE email = e.participant_email LIMIT 1) as participant_prenom
             FROM evaluations e
             JOIN formations f ON e.formation_id = f.id
             JOIN formateurs frmt ON e.formateur_id = frmt.id

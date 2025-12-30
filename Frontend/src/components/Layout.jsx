@@ -1,7 +1,7 @@
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext.jsx';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, LogOut, Home, Sun, Moon, Building2, Calendar, Star, UserPlus } from 'lucide-react';
+import { LayoutDashboard, BookOpen, LogOut, Home, Sun, Moon, Building2, Calendar, Star, UserPlus, Users } from 'lucide-react';
 
 const Layout = ({ children }) => {
     const { user, logout } = useAuth();
@@ -40,76 +40,122 @@ const Layout = ({ children }) => {
                 </div>
 
                 <nav className="flex flex-col gap-2">
-                    {/* Premier bouton: Accueil */}
-                    <button
-                        onClick={() => navigate('/')}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/') || isActive('/dashboard')
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
-                            }`}
-                    >
-                        <Home className="w-5 h-5" />
-                        <span>Accueil</span>
-                    </button>
+                    {/* Menu pour les Participants */}
+                    {user?.role === 'participant' && (
+                        <>
+                            <button
+                                onClick={() => navigate('/dashboard')}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/dashboard')
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
+                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
+                                    }`}
+                            >
+                                <LayoutDashboard className="w-5 h-5" />
+                                <span>Tableau de bord</span>
+                            </button>
+                            <button
+                                onClick={() => navigate('/mes-formations')}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/mes-formations')
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
+                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
+                                    }`}
+                            >
+                                <BookOpen className="w-5 h-5" />
+                                <span>Mes Formations</span>
+                            </button>
+                            <button
+                                onClick={() => navigate('/')}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/')
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
+                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
+                                    }`}
+                            >
+                                <Home className="w-5 h-5" />
+                                <span>Catalogue</span>
+                            </button>
+                        </>
+                    )}
 
-                    <button
-                        onClick={() => navigate('/formations')}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/formations')
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
-                            }`}
-                    >
-                        <BookOpen className="w-5 h-5" />
-                        <span>Formations</span>
-                    </button>
+                    {/* Menu pour Admin et Formateur */}
+                    {user?.role !== 'participant' && (
+                        <>
+                            <button
+                                onClick={() => navigate('/dashboard')}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/dashboard')
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
+                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
+                                    }`}
+                            >
+                                <LayoutDashboard className="w-5 h-5" />
+                                <span>Tableau de bord</span>
+                            </button>
+                            <button
+                                onClick={() => navigate('/')}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/') || isActive('/accueil')
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
+                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
+                                    }`}
+                            >
+                                <Home className="w-5 h-5" />
+                                <span>Accueil</span>
+                            </button>
 
-                    <button
-                        onClick={() => navigate('/formateurs')}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/formateurs') || isActive('/formateurs/ajouter')
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
-                            }`}
-                    >
-                        <div className="w-5 h-5 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                        </div>
-                        <span>Formateurs</span>
-                    </button>
+                            <button
+                                onClick={() => navigate('/formations')}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/formations')
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
+                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
+                                    }`}
+                            >
+                                <BookOpen className="w-5 h-5" />
+                                <span>Formations</span>
+                            </button>
 
-                    <button
-                        onClick={() => navigate('/entreprises')}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/entreprises') || isActive('/entreprises/ajouter') || location.pathname.startsWith('/entreprises/modifier')
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
-                            }`}
-                    >
-                        <Building2 className="w-5 h-5" />
-                        <span>Entreprises</span>
-                    </button>
+                            <button
+                                onClick={() => navigate('/formateurs')}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/formateurs') || isActive('/formateurs/ajouter')
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
+                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
+                                    }`}
+                            >
+                                <Users className="w-5 h-5" />
+                                <span>Formateurs</span>
+                            </button>
 
-                    <button
-                        onClick={() => navigate('/planifications')}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/planifications')
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
-                            }`}
-                    >
-                        <Calendar className="w-5 h-5" />
-                        <span>Planifications</span>
-                    </button>
+                            <button
+                                onClick={() => navigate('/entreprises')}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/entreprises') || isActive('/entreprises/ajouter') || location.pathname.startsWith('/entreprises/modifier')
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
+                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
+                                    }`}
+                            >
+                                <Building2 className="w-5 h-5" />
+                                <span>Entreprises</span>
+                            </button>
 
-                    <button
-                        onClick={() => navigate('/participants')}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/participants')
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
-                            }`}
-                    >
-                        <div className="w-5 h-5 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                        </div>
-                        <span>Participants</span>
-                    </button>
+                            <button
+                                onClick={() => navigate('/planifications')}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/planifications')
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
+                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
+                                    }`}
+                            >
+                                <Calendar className="w-5 h-5" />
+                                <span>Planifications</span>
+                            </button>
+
+                            <button
+                                onClick={() => navigate('/participants')}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/participants')
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
+                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
+                                    }`}
+                            >
+                                <Users className="w-5 h-5" />
+                                <span>Participants</span>
+                            </button>
+                        </>
+                    )}
 
                     {user?.role === 'admin' && (
                         <>
@@ -132,6 +178,16 @@ const Layout = ({ children }) => {
                             >
                                 <UserPlus className="w-5 h-5" />
                                 <span>Demandes Formateurs</span>
+                            </button>
+                            <button
+                                onClick={() => navigate('/demandes-participants')}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive('/demandes-participants')
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
+                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111827]'
+                                    }`}
+                            >
+                                <UserPlus className="w-5 h-5" />
+                                <span>Demandes Participants</span>
                             </button>
                         </>
                     )}

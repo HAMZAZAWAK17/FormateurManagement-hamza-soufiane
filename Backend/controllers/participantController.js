@@ -1,4 +1,6 @@
 import db from '../config/database.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 // Inscription publique d'un participant
 export const inscrireParticipant = async (req, res) => {
@@ -20,6 +22,20 @@ export const inscrireParticipant = async (req, res) => {
             });
         }
 
+        // Vérifier si l'utilisateur est connecté via le token
+        let utilisateur_id = null;
+        const authHeader = req.headers.authorization;
+        if (authHeader) {
+            const token = authHeader.split(' ')[1];
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key_123');
+                utilisateur_id = decoded.id;
+            } catch (err) {
+                // Token invalide ou expiré, on continue sans lier (inscription anonyme)
+                console.log('Token invalide lors de l\'inscription, inscription en tant qu\'invité');
+            }
+        }
+
         // Vérifier que la formation existe
         const [formation] = await db.query('SELECT id, titre FROM formations WHERE id = ?', [formation_id]);
         if (formation.length === 0) {
@@ -28,21 +44,44 @@ export const inscrireParticipant = async (req, res) => {
 
         // Vérifier si l'email existe déjà pour cette formation
         const [existing] = await db.query(
-            'SELECT id FROM participants WHERE email = ? AND formation_id = ?',
+            'SELECT id, utilisateur_id, statut FROM participants WHERE email = ? AND formation_id = ?',
             [email, formation_id]
         );
 
         if (existing.length > 0) {
-            return res.status(409).json({
-                message: 'Vous êtes déjà inscrit à cette formation'
-            });
+            const existingRecord = existing[0];
+
+            // Si l'inscription précédente était annulée, on la supprime pour permettre une nouvelle inscription
+            if (existingRecord.statut === 'annule') {
+                await db.query('DELETE FROM participants WHERE id = ?', [existingRecord.id]);
+            }
+            // Si l'inscription existe mais n'est pas liée à un compte utilisateur, et qu'on est connecté
+            else if (!existingRecord.utilisateur_id && utilisateur_id) {
+                // On met à jour l'enregistrement existant pour le lier à ce compte
+                await db.query(`
+                    UPDATE participants 
+                    SET utilisateur_id = ?, nom = ?, prenom = ?, date_naissance = ?, ville = ?, telephone = ?
+                    WHERE id = ?
+                `, [utilisateur_id, nom, prenom, date_naissance, ville, telephone, existingRecord.id]);
+
+                return res.status(200).json({
+                    message: 'Votre inscription existante a été liée à votre compte avec succès.',
+                    participantId: existingRecord.id
+                });
+            }
+            // Sinon, c'est un vrai conflit
+            else {
+                return res.status(409).json({
+                    message: 'Vous êtes déjà inscrit à cette formation'
+                });
+            }
         }
 
         // Insérer le participant
         const query = `
             INSERT INTO participants 
-            (nom, prenom, date_naissance, ville, email, telephone, formation_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (nom, prenom, date_naissance, ville, email, telephone, formation_id, utilisateur_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const [result] = await db.query(query, [
@@ -52,7 +91,8 @@ export const inscrireParticipant = async (req, res) => {
             ville,
             email,
             telephone,
-            formation_id
+            formation_id,
+            utilisateur_id
         ]);
 
         res.status(201).json({
@@ -125,42 +165,113 @@ export const getParticipantById = async (req, res) => {
 
 // Mettre à jour le statut d'un participant (Admin/Assistant)
 export const updateParticipantStatut = async (req, res) => {
+    const { id } = req.params;
+    const { statut, createAccount, password } = req.body;
+
+    if (!['en_attente', 'confirme', 'annule'].includes(statut)) {
+        return res.status(400).json({ message: 'Statut invalide' });
+    }
+
+    const connection = await db.getConnection();
     try {
-        const { id } = req.params;
-        const { statut } = req.body;
+        await connection.beginTransaction();
 
-        if (!['en_attente', 'confirme', 'annule'].includes(statut)) {
-            return res.status(400).json({ message: 'Statut invalide' });
-        }
-
-        const [result] = await db.query(
-            'UPDATE participants SET statut = ? WHERE id = ?',
-            [statut, id]
+        // Récupérer les informations du participant
+        const [participant] = await connection.execute(
+            'SELECT * FROM participants WHERE id = ?',
+            [id]
         );
 
-        if (result.affectedRows === 0) {
+        if (participant.length === 0) {
+            await connection.rollback();
             return res.status(404).json({ message: 'Participant non trouvé' });
         }
 
+        // Si approuvé (confirme) et création de compte demandée
+        if (statut === 'confirme' && createAccount) {
+            const { nom, prenom, email } = participant[0];
+            const passwordToUse = password || 'participant123';
+
+            // Vérifier si l'utilisateur existe déjà
+            const [existingUser] = await connection.execute(
+                'SELECT id FROM utilisateurs WHERE email = ?',
+                [email]
+            );
+
+            let utilisateur_id = null;
+
+            if (existingUser.length === 0) {
+                // Hacher le mot de passe
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(passwordToUse, salt);
+
+                // Créer le compte utilisateur
+                const [userResult] = await connection.execute(
+                    'INSERT INTO utilisateurs (nom, prenom, email, password, role) VALUES (?, ?, ?, ?, ?)',
+                    [nom, prenom, email, hashedPassword, 'participant']
+                );
+                utilisateur_id = userResult.insertId;
+
+                // Mettre à jour le participant avec l'ID utilisateur ET le mot de passe temporaire
+                await connection.execute(
+                    'UPDATE participants SET utilisateur_id = ?, statut = ?, password_temporaire = ? WHERE id = ?',
+                    [utilisateur_id, statut, passwordToUse, id]
+                );
+            } else {
+                // Juste mettre à jour le statut et le mot de passe temporaire
+                await connection.execute(
+                    'UPDATE participants SET statut = ?, password_temporaire = ? WHERE id = ?',
+                    [statut, passwordToUse, id]
+                );
+            }
+        } else {
+            // Mettre à jour uniquement le statut
+            await connection.execute(
+                'UPDATE participants SET statut = ? WHERE id = ?',
+                [statut, id]
+            );
+        }
+
+        await connection.commit();
         res.json({ message: 'Statut mis à jour avec succès' });
     } catch (error) {
+        await connection.rollback();
         console.error('Erreur lors de la mise à jour du statut:', error);
         res.status(500).json({ message: 'Erreur serveur' });
+    } finally {
+        connection.release();
     }
 };
 
 // Supprimer un participant (Admin/Assistant)
+// Supprimer un participant (Admin/Assistant ou le participant lui-même)
 export const deleteParticipant = async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = req.user.id;
+        const userRole = req.user.role;
 
-        const [result] = await db.query('DELETE FROM participants WHERE id = ?', [id]);
+        // 1. Récupérer le participant pour vérifier les droits
+        const [participant] = await db.query('SELECT utilisateur_id FROM participants WHERE id = ?', [id]);
 
-        if (result.affectedRows === 0) {
+        if (participant.length === 0) {
             return res.status(404).json({ message: 'Participant non trouvé' });
         }
 
-        res.json({ message: 'Participant supprimé avec succès' });
+        // 2. Vérification des permissions
+        // L'admin et l'assistant peuvent tout supprimer
+        const isAdminOrAssistant = userRole === 'admin' || userRole === 'assistant';
+        // Le participant ne peut supprimer que sa propre inscription
+        const isOwner = participant[0].utilisateur_id === userId;
+
+        if (!isAdminOrAssistant && !isOwner) {
+            return res.status(403).json({ message: 'Vous n\'êtes pas autorisé à supprimer cette inscription' });
+        }
+
+        // 3. Suppression
+        await db.query('DELETE FROM participants WHERE id = ?', [id]);
+
+        res.json({ message: 'Inscription supprimée avec succès' });
     } catch (error) {
         console.error('Erreur lors de la suppression:', error);
         res.status(500).json({ message: 'Erreur serveur' });
@@ -324,5 +435,140 @@ export const getStatsParticipants = async (req, res) => {
     } catch (error) {
         console.error('Erreur lors de la récupération des statistiques:', error);
         res.status(500).json({ message: 'Erreur serveur' });
+    }
+};
+
+// Vérifier le statut d'un participant par email
+export const checkStatutByEmail = async (req, res) => {
+    const { email } = req.body;
+
+    // Validation de l'email
+    if (!email) {
+        return res.status(400).json({ message: 'L\'email est requis.' });
+    }
+
+    try {
+        // Récupérer la demande du participant
+        // Note: On suppose qu'un email peut avoir plusieurs inscriptions (différentes formations)
+        // Mais pour simplifier ici, on prend la plus récente
+        const [participant] = await db.execute(
+            `SELECT p.id, p.nom, p.prenom, p.email, p.statut, p.created_at, p.password_temporaire, 
+                    f.titre as formation_titre
+            FROM participants p
+            JOIN formations f ON p.formation_id = f.id
+            WHERE p.email = ?
+            ORDER BY p.created_at DESC
+            LIMIT 1`,
+            [email]
+        );
+
+        if (participant.length === 0) {
+            return res.status(404).json({
+                message: 'Aucune inscription trouvée avec cet email.',
+                found: false
+            });
+        }
+
+        const info = participant[0];
+
+        // Mappage des statuts pour correspondre à l'UI
+        // 'confirme' -> 'approuve' pour correspondre à la logique de la page StatutDemande
+        let statutUI = info.statut;
+        if (statutUI === 'confirme') statutUI = 'approuve';
+
+        const response = {
+            found: true,
+            demande: {
+                nom: info.nom,
+                prenom: info.prenom,
+                email: info.email,
+                statut: statutUI,
+                created_at: info.created_at,
+                mots_cles: info.formation_titre // On utilise formation_titre à la place de mots_cles pour l'affichage
+            }
+        };
+
+        if (statutUI === 'approuve' && info.password_temporaire) {
+            response.demande.password_temporaire = info.password_temporaire;
+        }
+
+        res.json(response);
+    } catch (error) {
+        console.error('Erreur lors de la vérification du statut:', error);
+        res.status(500).json({
+            message: 'Erreur lors de la vérification du statut.'
+        });
+    }
+};
+
+// Récupérer mes formations (celles où je suis inscrit)
+export const getMesFormations = async (req, res) => {
+    try {
+        const userId = req.user.id; // ID de la table utilisateurs
+
+        // On cherche le participant lié à cet utilisateur
+        // On essaie aussi de trouver un formateur_id associé (soit via session, soit le dernier ayant donné cette formation)
+        const query = `
+            SELECT p.id, p.formation_id, p.statut, 
+                   f.titre, f.nombre_heures, f.cout, 
+                   f.objectifs,
+                   (
+                       -- Priorité 1: Formateur de la session assignée
+                       SELECT s.formateur_id 
+                       FROM participants_sessions ps 
+                       JOIN sessions_individuelles s ON ps.session_id = s.id 
+                       WHERE ps.participant_id = p.id AND s.formateur_id IS NOT NULL 
+                       LIMIT 1
+                   ) as formateur_assigne,
+                   (
+                       -- Priorité 2: Dernier formateur ayant planifié cette formation (fallback)
+                       SELECT plan.formateur_id 
+                       FROM planifications plan 
+                       WHERE plan.formation_id = p.formation_id 
+                       ORDER BY plan.date_debut DESC 
+                       LIMIT 1
+                   ) as formateur_planif,
+                   (
+                       -- Priorité 3 (Fallback ultime pour test): Premier formateur dispo
+                       SELECT id FROM formateurs WHERE statut = 'approuve' LIMIT 1
+                   ) as formateur_default
+            FROM participants p
+            JOIN formations f ON p.formation_id = f.id
+            WHERE p.utilisateur_id = ?
+            ORDER BY p.created_at DESC
+        `;
+
+        const [participantRecords] = await db.query(query, [userId]);
+
+        if (participantRecords.length === 0) {
+            return res.json([]);
+        }
+
+        // Récupérer l'email de l'utilisateur pour vérifier les évaluations
+        const [user] = await db.query('SELECT email FROM utilisateurs WHERE id = ?', [userId]);
+        const userEmail = user[0].email;
+
+        const formationsWithDetails = await Promise.all(participantRecords.map(async (record) => {
+            // Déterminer le formateur ID à utiliser (Assigne > Planifié > Defaut)
+            const resolvedFormateurId = record.formateur_assigne || record.formateur_planif || record.formateur_default;
+
+            const [evals] = await db.query(
+                `SELECT id FROM evaluations 
+                 WHERE formation_id = ? AND participant_email = ?`,
+                [record.formation_id, userEmail]
+            );
+
+            return {
+                ...record,
+                formateur_id: resolvedFormateurId, // On renvoie le formateur trouvé
+                a_evalue: evals.length > 0
+            };
+        }));
+
+        res.json(formationsWithDetails);
+
+    } catch (error) {
+        console.error('Erreur lors de la récupération de mes formations:', error);
+        res.status(500).json({ message: 'Erreur serveur', error: error.message, sqlMessage: error.sqlMessage });
     }
 };

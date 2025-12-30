@@ -88,7 +88,9 @@ const ListeEvaluations = () => {
                                         )}
 
                                         <div className="mt-3 text-xs text-gray-400 text-right">
-                                            De : {ev.participant_email || 'Anonyme'}
+                                            De : {ev.participant_prenom && ev.participant_nom
+                                                ? `${ev.participant_prenom} ${ev.participant_nom}`
+                                                : (ev.participant_email || 'Anonyme')}
                                         </div>
                                     </div>
                                 </div>

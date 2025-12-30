@@ -21,7 +21,10 @@ import EvaluerFormation from './pages/EvaluerFormation';
 import ListeEvaluations from './pages/ListeEvaluations';
 import InscriptionFormateurExterne from './pages/InscriptionFormateurExterne';
 import GestionDemandesFormateurs from './pages/GestionDemandesFormateurs';
+import GestionDemandesParticipants from './pages/GestionDemandesParticipants';
 import StatutDemande from './pages/StatutDemande';
+import InscriptionParticipant from './pages/InscriptionParticipant';
+import MesFormations from './pages/MesFormations';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -91,6 +94,7 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/evaluer" element={<EvaluerFormation />} />
               <Route path="/inscription-formateur" element={<InscriptionFormateurExterne />} />
+              <Route path="/inscription-participant" element={<InscriptionParticipant />} />
               <Route path="/statut-demande" element={<StatutDemande />} />
 
               {/* Protected Routes */}
@@ -107,6 +111,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Participants />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/mes-formations"
+                element={
+                  <ProtectedRoute>
+                    <MesFormations />
                   </ProtectedRoute>
                 }
               />
@@ -203,6 +215,14 @@ function App() {
                 element={
                   <AdminRoute>
                     <GestionDemandesFormateurs />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/demandes-participants"
+                element={
+                  <AdminRoute>
+                    <GestionDemandesParticipants />
                   </AdminRoute>
                 }
               />

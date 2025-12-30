@@ -11,6 +11,7 @@ const EvaluerFormation = () => {
     // Récupérer les IDs depuis l'URL (ex: /evaluer?formationId=1&formateurId=2)
     const formationId = searchParams.get('formationId');
     const formateurId = searchParams.get('formateurId');
+    const urlEmail = searchParams.get('participantEmail'); // Email pré-rempli si dispo
 
     const [formData, setFormData] = useState({
         qualite_pedagogique: 0,
@@ -18,7 +19,7 @@ const EvaluerFormation = () => {
         support_cours: 0,
         maitrise_sujet: 0,
         commentaire: '',
-        participant_email: ''
+        participant_email: urlEmail || ''
     });
 
     const [loading, setLoading] = useState(false);
