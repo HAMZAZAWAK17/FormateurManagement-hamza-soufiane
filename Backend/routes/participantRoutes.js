@@ -16,6 +16,7 @@ router.get('/mes-formations', participantController.getMesFormations);
 router.get('/stats', participantController.getStatsParticipants);
 router.get('/:id', participantController.getParticipantById);
 router.put('/:id/statut', participantController.updateParticipantStatut);
+router.put('/:id/create-password', participantController.createPassword);
 router.delete('/:id', participantController.deleteParticipant);
 
 // Routes pour les sessions individuelles

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import Layout from '../components/Layout';
 import {
     UserCheck,
     UserX,
@@ -96,54 +97,56 @@ const GestionDemandesFormateurs = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                    <p className="text-gray-400">Chargement des demandes...</p>
+            <Layout>
+                <div className="min-h-screen bg-slate-50 dark:bg-[#020617] flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                        <p className="text-slate-600 dark:text-slate-400">Chargement des demandes...</p>
+                    </div>
                 </div>
-            </div>
+            </Layout>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white p-6">
-            <div className="max-w-7xl mx-auto">
+        <Layout>
+            <div className="p-6 space-y-6">
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                         Demandes de Formateurs Externes
                     </h1>
-                    <p className="text-gray-400">
+                    <p className="text-slate-600 dark:text-slate-400">
                         Gérez les candidatures des formateurs souhaitant rejoindre votre plateforme
                     </p>
                 </div>
 
                 {error && (
-                    <div className="bg-red-900/50 border border-red-500 rounded-lg p-4 mb-6 flex items-center">
-                        <AlertCircle className="w-5 h-5 text-red-400 mr-3" />
-                        <p className="text-red-200">{error}</p>
+                    <div className="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-500 rounded-lg p-4 mb-6 flex items-center">
+                        <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mr-3" />
+                        <p className="text-red-800 dark:text-red-200">{error}</p>
                     </div>
                 )}
 
                 {/* Statistiques */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                    <div className="bg-white dark:bg-[#1e293b] rounded-xl p-6 border border-slate-200 dark:border-slate-700">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-gray-400 text-sm mb-1">Total en attente</p>
-                                <p className="text-3xl font-bold text-blue-400">{demandes.length}</p>
+                                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Total en attente</p>
+                                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{demandes.length}</p>
                             </div>
-                            <Clock className="w-12 h-12 text-blue-400 opacity-50" />
+                            <Clock className="w-12 h-12 text-blue-600 dark:text-blue-400 opacity-50" />
                         </div>
                     </div>
                 </div>
 
                 {/* Liste des demandes */}
                 {demandes.length === 0 ? (
-                    <div className="bg-gray-800 rounded-xl p-12 text-center border border-gray-700">
-                        <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-                        <h3 className="text-xl font-semibold mb-2">Aucune demande en attente</h3>
-                        <p className="text-gray-400">
+                    <div className="bg-white dark:bg-[#1e293b] rounded-xl p-12 text-center border border-slate-200 dark:border-slate-700">
+                        <CheckCircle className="w-16 h-16 text-green-500 dark:text-green-400 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold mb-2 text-slate-900 dark:text-white">Aucune demande en attente</h3>
+                        <p className="text-slate-600 dark:text-slate-400">
                             Toutes les demandes ont été traitées !
                         </p>
                     </div>
@@ -152,41 +155,41 @@ const GestionDemandesFormateurs = () => {
                         {demandes.map((demande) => (
                             <div
                                 key={demande.id}
-                                className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-blue-500 transition-all duration-300"
+                                className="bg-white dark:bg-[#1e293b] rounded-xl p-6 border border-slate-200 dark:border-slate-700 hover:border-blue-500 transition-all duration-300"
                             >
                                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                                     {/* Informations */}
                                     <div className="flex-1 space-y-3">
                                         <div className="flex items-start justify-between">
-                                            <h3 className="text-xl font-bold text-white">
+                                            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
                                                 {demande.prenom} {demande.nom}
                                             </h3>
-                                            <span className="px-3 py-1 bg-yellow-900/50 text-yellow-400 rounded-full text-sm font-medium flex items-center">
+                                            <span className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400 rounded-full text-sm font-medium flex items-center">
                                                 <Clock className="w-4 h-4 mr-1" />
                                                 En attente
                                             </span>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            <div className="flex items-center text-gray-300">
-                                                <Mail className="w-4 h-4 mr-2 text-blue-400" />
+                                            <div className="flex items-center text-slate-700 dark:text-slate-300">
+                                                <Mail className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" />
                                                 <span className="text-sm">{demande.email}</span>
                                             </div>
-                                            <div className="flex items-center text-gray-300">
-                                                <Calendar className="w-4 h-4 mr-2 text-purple-400" />
+                                            <div className="flex items-center text-slate-700 dark:text-slate-300">
+                                                <Calendar className="w-4 h-4 mr-2 text-purple-500 dark:text-purple-400" />
                                                 <span className="text-sm">{formatDate(demande.created_at)}</span>
                                             </div>
                                         </div>
 
                                         <div className="flex items-start">
-                                            <Tag className="w-4 h-4 mr-2 text-green-400 mt-1 flex-shrink-0" />
+                                            <Tag className="w-4 h-4 mr-2 text-green-500 dark:text-green-400 mt-1 flex-shrink-0" />
                                             <div className="flex-1">
-                                                <p className="text-sm text-gray-400 mb-1">Compétences :</p>
+                                                <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Compétences :</p>
                                                 <div className="flex flex-wrap gap-2">
                                                     {demande.mots_cles.split(',').map((mot, index) => (
                                                         <span
                                                             key={index}
-                                                            className="px-2 py-1 bg-blue-900/30 text-blue-300 rounded text-xs"
+                                                            className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs"
                                                         >
                                                             {mot.trim()}
                                                         </span>
@@ -196,9 +199,9 @@ const GestionDemandesFormateurs = () => {
                                         </div>
 
                                         {demande.remarques && (
-                                            <div className="bg-gray-700/50 rounded-lg p-3">
-                                                <p className="text-sm text-gray-400 mb-1">Remarques :</p>
-                                                <p className="text-sm text-gray-300">{demande.remarques}</p>
+                                            <div className="bg-slate-100 dark:bg-slate-700/50 rounded-lg p-3">
+                                                <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Remarques :</p>
+                                                <p className="text-sm text-slate-800 dark:text-slate-300">{demande.remarques}</p>
                                             </div>
                                         )}
                                     </div>
@@ -385,8 +388,9 @@ const GestionDemandesFormateurs = () => {
                         </div>
                     </div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </Layout>
     );
 };
 

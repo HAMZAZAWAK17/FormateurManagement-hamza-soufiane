@@ -123,6 +123,7 @@ INSERT INTO `formations` (`id`, `titre`, `nombre_heures`, `cout`, `objectifs`, `
 
 CREATE TABLE `participants` (
   `id` int(11) NOT NULL,
+  `utilisateur_id` int(11) DEFAULT NULL,
   `nom` varchar(100) NOT NULL,
   `prenom` varchar(100) NOT NULL,
   `date_naissance` date NOT NULL,
@@ -131,6 +132,7 @@ CREATE TABLE `participants` (
   `telephone` varchar(20) NOT NULL,
   `formation_id` int(11) NOT NULL,
   `statut` enum('en_attente','confirme','annule') DEFAULT 'en_attente',
+  `password_temporaire` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -240,7 +242,7 @@ CREATE TABLE `utilisateurs` (
   `prenom` varchar(100) NOT NULL,
   `email` varchar(150) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('admin','formateur','assistant') NOT NULL,
+  `role` enum('admin','formateur','assistant','participant') NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -295,7 +297,8 @@ ALTER TABLE `formations`
 ALTER TABLE `participants`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_participants_formation` (`formation_id`),
-  ADD KEY `idx_participants_email` (`email`);
+  ADD KEY `idx_participants_email` (`email`),
+  ADD KEY `idx_participants_utilisateur` (`utilisateur_id`);
 
 --
 -- Index pour la table `participants_sessions`
@@ -411,7 +414,8 @@ ALTER TABLE `formateurs`
 -- Contraintes pour la table `participants`
 --
 ALTER TABLE `participants`
-  ADD CONSTRAINT `participants_ibfk_1` FOREIGN KEY (`formation_id`) REFERENCES `formations` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `participants_ibfk_1` FOREIGN KEY (`formation_id`) REFERENCES `formations` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `participants_ibfk_utilisateur` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL;
 
 --
 -- Contraintes pour la table `participants_sessions`

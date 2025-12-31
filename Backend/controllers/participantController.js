@@ -243,6 +243,97 @@ export const updateParticipantStatut = async (req, res) => {
     }
 };
 
+// Créer/Mettre à jour le mot de passe d'un participant confirmé
+export const createPassword = async (req, res) => {
+    const { id } = req.params;
+    const { password } = req.body;
+
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Récupérer les informations du participant
+        const [participant] = await connection.execute(
+            'SELECT * FROM participants WHERE id = ?',
+            [id]
+        );
+
+        if (participant.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ message: 'Participant non trouvé' });
+        }
+
+        const participantData = participant[0];
+
+        // Vérifier que le participant est confirmé
+        if (participantData.statut !== 'confirme') {
+            await connection.rollback();
+            return res.status(400).json({
+                message: 'Le participant doit être confirmé avant de créer un mot de passe'
+            });
+        }
+
+        const passwordToUse = password || `participant${Math.floor(Math.random() * 10000)}`;
+
+        // Vérifier si l'utilisateur existe déjà
+        const [existingUser] = await connection.execute(
+            'SELECT id FROM utilisateurs WHERE email = ?',
+            [participantData.email]
+        );
+
+        let utilisateur_id = participantData.utilisateur_id;
+
+        if (existingUser.length === 0 && !utilisateur_id) {
+            // Créer le compte utilisateur
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(passwordToUse, salt);
+
+            const [userResult] = await connection.execute(
+                'INSERT INTO utilisateurs (nom, prenom, email, password, role) VALUES (?, ?, ?, ?, ?)',
+                [participantData.nom, participantData.prenom, participantData.email, hashedPassword, 'participant']
+            );
+            utilisateur_id = userResult.insertId;
+
+            // Mettre à jour le participant avec l'ID utilisateur et le mot de passe temporaire
+            await connection.execute(
+                'UPDATE participants SET utilisateur_id = ?, password_temporaire = ? WHERE id = ?',
+                [utilisateur_id, passwordToUse, id]
+            );
+        } else {
+            // Juste mettre à jour le mot de passe temporaire et éventuellement le mot de passe utilisateur
+            if (utilisateur_id || existingUser.length > 0) {
+                const userId = utilisateur_id || existingUser[0].id;
+
+                // Mettre à jour le mot de passe de l'utilisateur
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(passwordToUse, salt);
+
+                await connection.execute(
+                    'UPDATE utilisateurs SET password = ? WHERE id = ?',
+                    [hashedPassword, userId]
+                );
+            }
+
+            await connection.execute(
+                'UPDATE participants SET password_temporaire = ? WHERE id = ?',
+                [passwordToUse, id]
+            );
+        }
+
+        await connection.commit();
+        res.json({
+            message: 'Mot de passe créé avec succès',
+            password: passwordToUse
+        });
+    } catch (error) {
+        await connection.rollback();
+        console.error('Erreur lors de la création du mot de passe:', error);
+        res.status(500).json({ message: 'Erreur serveur' });
+    } finally {
+        connection.release();
+    }
+};
+
 // Supprimer un participant (Admin/Assistant)
 // Supprimer un participant (Admin/Assistant ou le participant lui-même)
 export const deleteParticipant = async (req, res) => {
