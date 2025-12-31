@@ -21,7 +21,12 @@ const Login = () => {
         const result = await login(email, password);
         if (result.success) {
             toast.success('Connexion réussie !');
-            navigate('/dashboard');
+            // Redirect based on role
+            if (result.user?.role === 'participant') {
+                navigate('/participant/dashboard');
+            } else {
+                navigate('/dashboard');
+            }
         } else {
             toast.error(result.message);
             setError(result.message);

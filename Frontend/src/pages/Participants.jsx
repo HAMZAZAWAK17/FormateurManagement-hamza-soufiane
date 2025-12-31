@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { Users, Edit2, Trash2, CheckCircle, XCircle, Clock, Filter } from 'lucide-react';
+import { Users, Edit2, Trash2, CheckCircle, XCircle, Clock, Filter, Key } from 'lucide-react';
 import Layout from '../components/Layout';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -81,6 +81,59 @@ const Participants = () => {
             console.error('Erreur lors du changement de statut:', error);
             toast.error('Erreur lors du changement de statut');
         }
+    };
+
+    const handleCreatePassword = async (participantId, participantEmail) => {
+        toast((t) => (
+            <div className="flex flex-col gap-3 min-w-[300px]">
+                <p className="text-sm font-medium">Créer un mot de passe pour ce participant</p>
+                <input
+                    id={`password-input-${participantId}`}
+                    type="text"
+                    placeholder="Laisser vide pour générer automatiquement"
+                    className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500"
+                />
+                <div className="flex justify-end gap-2">
+                    <button
+                        onClick={() => toast.dismiss(t.id)}
+                        className="px-3 py-1 text-xs bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                    >
+                        Annuler
+                    </button>
+                    <button
+                        onClick={async () => {
+                            const passwordInput = document.getElementById(`password-input-${participantId}`);
+                            const password = passwordInput?.value || '';
+                            toast.dismiss(t.id);
+
+                            try {
+                                const token = localStorage.getItem('token');
+                                const response = await axios.put(
+                                    `${API_URL}/participants/${participantId}/create-password`,
+                                    { password },
+                                    { headers: { Authorization: `Bearer ${token}` } }
+                                );
+
+                                toast.success(
+                                    `Mot de passe créé: ${response.data.password}\nLe participant peut le voir en vérifiant son statut.`,
+                                    { duration: 8000 }
+                                );
+                                fetchData();
+                            } catch (error) {
+                                console.error('Erreur:', error);
+                                toast.error(error.response?.data?.message || 'Erreur lors de la création du mot de passe');
+                            }
+                        }}
+                        className="px-3 py-1 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors"
+                    >
+                        Créer
+                    </button>
+                </div>
+            </div>
+        ), {
+            duration: Infinity,
+            position: 'top-center'
+        });
     };
 
     const handleDelete = async (id) => {
@@ -275,13 +328,25 @@ const Participants = () => {
                                                     </select>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <button
-                                                        onClick={() => handleDelete(participant.id)}
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition-colors"
-                                                    >
-                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                        Supprimer
-                                                    </button>
+                                                    <div className="flex items-center gap-2">
+                                                        {participant.statut === 'confirme' && (
+                                                            <button
+                                                                onClick={() => handleCreatePassword(participant.id, participant.email)}
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-lg transition-colors"
+                                                                title="Créer/Modifier mot de passe"
+                                                            >
+                                                                <Key className="w-3.5 h-3.5" />
+                                                                Mot de passe
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={() => handleDelete(participant.id)}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition-colors"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                            Supprimer
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </motion.tr>
                                         ))

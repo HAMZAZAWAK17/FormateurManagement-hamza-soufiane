@@ -23,7 +23,6 @@ const GestionDemandesParticipants = () => {
     const [error, setError] = useState('');
     const [selectedDemande, setSelectedDemande] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [createAccount, setCreateAccount] = useState(false);
     const [password, setPassword] = useState('');
@@ -112,18 +111,12 @@ const GestionDemandesParticipants = () => {
             );
 
             alert(`Mot de passe créé avec succès: ${newPassword}\nLe participant peut maintenant le voir en vérifiant son statut.`);
-            setShowPasswordModal(false);
+            setShowModal(false);
             setPassword('');
             fetchDemandes();
         } catch (err) {
             alert(err.response?.data?.message || 'Erreur lors de la création du mot de passe');
         }
-    };
-
-    const openPasswordModal = (demande) => {
-        setSelectedDemande(demande);
-        setPassword('');
-        setShowPasswordModal(true);
     };
 
     if (loading) {
@@ -292,11 +285,15 @@ const GestionDemandesParticipants = () => {
 
                                         {demande.statut === 'confirme' && (
                                             <button
-                                                onClick={() => openPasswordModal(demande)}
+                                                onClick={() => {
+                                                    setSelectedDemande(demande);
+                                                    setShowModal(true);
+                                                    setPassword('');
+                                                }}
                                                 className="flex-1 lg:flex-none px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center justify-center"
+                                                title="Créer/Modifier mot de passe"
                                             >
-                                                <Key className="w-4 h-4 mr-2" />
-                                                {demande.password_temporaire ? 'Modifier mot de passe' : 'Créer mot de passe'}
+                                                <Key className="w-4 h-4" />
                                             </button>
                                         )}
                                     </div>
@@ -365,141 +362,134 @@ const GestionDemandesParticipants = () => {
                                 </div>
                             </div>
 
-                            {/* Options d'approbation */}
-                            <div className="border-t border-gray-700 pt-6">
-                                <h3 className="text-lg font-semibold text-white mb-4">Options d'approbation</h3>
+                            {/* Options d'approbation - Seulement pour les participants en attente */}
+                            {selectedDemande.statut === 'en_attente' && (
+                                <div className="border-t border-gray-700 pt-6">
+                                    <h3 className="text-lg font-semibold text-white mb-4">Options d'approbation</h3>
 
-                                <div className="bg-gray-700/50 rounded-lg p-4 mb-4">
-                                    <label className="flex items-center cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={createAccount}
-                                            onChange={(e) => setCreateAccount(e.target.checked)}
-                                            className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                        />
-                                        <span className="ml-3 text-white font-medium">
-                                            Créer un compte utilisateur Participant
-                                        </span>
-                                    </label>
-                                    <p className="text-sm text-gray-400 mt-2 ml-8">
-                                        Permet au participant de se connecter pour évaluer la formation
-                                    </p>
+                                    <div className="bg-gray-700/50 rounded-lg p-4 mb-4">
+                                        <label className="flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={createAccount}
+                                                onChange={(e) => setCreateAccount(e.target.checked)}
+                                                className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                            />
+                                            <span className="ml-3 text-white font-medium">
+                                                Créer un compte utilisateur Participant
+                                            </span>
+                                        </label>
+                                        <p className="text-sm text-gray-400 mt-2 ml-8">
+                                            Permet au participant de se connecter pour évaluer la formation
+                                        </p>
+                                    </div>
+
+                                    {createAccount && (
+                                        <div className="bg-gray-700/50 rounded-lg p-4">
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                <Key className="w-4 h-4 inline mr-2" />
+                                                Mot de passe temporaire
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                placeholder="Laisser vide pour générer automatiquement"
+                                                className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                            <p className="text-xs text-gray-400 mt-2">
+                                                Si vide, le mot de passe par défaut sera : participant123
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
+                            )}
 
-                                {createAccount && (
+                            {/* Section de création de mot de passe - Pour les participants confirmés */}
+                            {selectedDemande.statut === 'confirme' && (
+                                <div className="border-t border-gray-700 pt-6">
+                                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                                        <Key className="w-5 h-5 mr-2 text-indigo-400" />
+                                        Créer / Modifier le mot de passe
+                                    </h3>
+
+                                    {selectedDemande.password_temporaire && (
+                                        <div className="bg-green-900/20 border border-green-700 rounded-lg p-4 mb-4">
+                                            <p className="text-sm text-green-400 mb-2">
+                                                ✓ Un mot de passe existe déjà pour ce participant
+                                            </p>
+                                            <p className="text-xs text-gray-400">
+                                                Vous pouvez le modifier en créant un nouveau mot de passe ci-dessous
+                                            </p>
+                                        </div>
+                                    )}
+
                                     <div className="bg-gray-700/50 rounded-lg p-4">
                                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                                            <Key className="w-4 h-4 inline mr-2" />
-                                            Mot de passe temporaire
+                                            Nouveau mot de passe
                                         </label>
                                         <input
                                             type="text"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                             placeholder="Laisser vide pour générer automatiquement"
-                                            className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                         />
                                         <p className="text-xs text-gray-400 mt-2">
-                                            Si vide, le mot de passe par défaut sera : participant123
+                                            Si vide, un mot de passe aléatoire sera généré (ex: participant1234)
                                         </p>
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
 
                             {/* Actions */}
                             <div className="flex gap-4 pt-4">
-                                <button
-                                    onClick={() => handleAction(selectedDemande.id, 'confirme')}
-                                    disabled={actionLoading}
-                                    className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
-                                >
-                                    {actionLoading ? (
-                                        <>
-                                            <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            Traitement...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <UserCheck className="w-5 h-5 mr-2" />
-                                            Approuver
-                                        </>
-                                    )}
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        if (confirm('Êtes-vous sûr de vouloir rejeter cette inscription ?')) {
-                                            handleAction(selectedDemande.id, 'annule');
-                                        }
-                                    }}
-                                    disabled={actionLoading}
-                                    className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
-                                >
-                                    <UserX className="w-5 h-5 mr-2" />
-                                    Rejeter
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+                                {selectedDemande.statut === 'en_attente' && (
+                                    <>
+                                        <button
+                                            onClick={() => handleAction(selectedDemande.id, 'confirme')}
+                                            disabled={actionLoading}
+                                            className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
+                                        >
+                                            {actionLoading ? (
+                                                <>
+                                                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    Traitement...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <UserCheck className="w-5 h-5 mr-2" />
+                                                    Approuver
+                                                </>
+                                            )}
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (confirm('Êtes-vous sûr de vouloir rejeter cette inscription ?')) {
+                                                    handleAction(selectedDemande.id, 'annule');
+                                                }
+                                            }}
+                                            disabled={actionLoading}
+                                            className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
+                                        >
+                                            <UserX className="w-5 h-5 mr-2" />
+                                            Rejeter
+                                        </button>
+                                    </>
+                                )}
 
-            {/* Modal de création de mot de passe */}
-            {showPasswordModal && selectedDemande && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full border border-slate-300 dark:border-gray-700">
-                        <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-                            <h2 className="text-2xl font-bold text-white">Créer mot de passe</h2>
-                            <button
-                                onClick={() => setShowPasswordModal(false)}
-                                className="text-white hover:text-gray-200 transition-colors"
-                            >
-                                <XCircle className="w-6 h-6" />
-                            </button>
-                        </div>
-
-                        <div className="p-6 space-y-4">
-                            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                                <p className="text-sm text-blue-800 dark:text-blue-200">
-                                    <strong>{selectedDemande.prenom} {selectedDemande.nom}</strong>
-                                    <br />
-                                    {selectedDemande.email}
-                                </p>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                                    <Key className="w-4 h-4 inline mr-2" />
-                                    Mot de passe
-                                </label>
-                                <input
-                                    type="text"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Laisser vide pour générer automatiquement"
-                                    className="w-full px-4 py-2 bg-slate-50 dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                />
-                                <p className="text-xs text-slate-500 dark:text-gray-400 mt-2">
-                                    Si vide, un mot de passe aléatoire sera généré automatiquement
-                                </p>
-                            </div>
-
-                            <div className="flex gap-3 pt-4">
-                                <button
-                                    onClick={() => setShowPasswordModal(false)}
-                                    className="flex-1 px-4 py-2 bg-slate-200 dark:bg-gray-700 hover:bg-slate-300 dark:hover:bg-gray-600 text-slate-700 dark:text-gray-200 rounded-lg transition-colors"
-                                >
-                                    Annuler
-                                </button>
-                                <button
-                                    onClick={() => handleCreatePassword(selectedDemande.id)}
-                                    className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center justify-center"
-                                >
-                                    <Key className="w-4 h-4 mr-2" />
-                                    Créer
-                                </button>
+                                {selectedDemande.statut === 'confirme' && (
+                                    <button
+                                        onClick={() => handleCreatePassword(selectedDemande.id)}
+                                        className="flex-1 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center justify-center"
+                                    >
+                                        <Key className="w-5 h-5 mr-2" />
+                                        {selectedDemande.password_temporaire ? 'Modifier le mot de passe' : 'Créer le mot de passe'}
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>

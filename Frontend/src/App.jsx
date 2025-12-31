@@ -25,6 +25,12 @@ import GestionDemandesParticipants from './pages/GestionDemandesParticipants';
 import StatutDemande from './pages/StatutDemande';
 import InscriptionParticipant from './pages/InscriptionParticipant';
 import MesFormations from './pages/MesFormations';
+import ParticipantDashboard from './pages/ParticipantDashboard';
+import ParticipantFormations from './pages/ParticipantFormations';
+import ParticipantProfil from './pages/ParticipantProfil';
+import ParticipantPlanifications from './pages/ParticipantPlanifications';
+import ParticipantEvaluations from './pages/ParticipantEvaluations';
+import ParticipantEntreprises from './pages/ParticipantEntreprises';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -224,6 +230,56 @@ function App() {
                   <AdminRoute>
                     <GestionDemandesParticipants />
                   </AdminRoute>
+                }
+              />
+
+              {/* Participant Routes */}
+              <Route
+                path="/participant/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <ParticipantDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/participant/formations"
+                element={
+                  <ProtectedRoute>
+                    <ParticipantFormations />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/participant/profil"
+                element={
+                  <ProtectedRoute>
+                    <ParticipantProfil />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/participant/planifications"
+                element={
+                  <ProtectedRoute>
+                    <ParticipantPlanifications />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/participant/evaluations"
+                element={
+                  <ProtectedRoute>
+                    <ParticipantEvaluations />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/participant/entreprises"
+                element={
+                  <ProtectedRoute>
+                    <ParticipantEntreprises />
+                  </ProtectedRoute>
                 }
               />
             </Routes>
