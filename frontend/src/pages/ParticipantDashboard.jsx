@@ -170,7 +170,7 @@ const ParticipantDashboard = () => {
         <Box sx={{ display: 'flex' }}>
             <ProfessionalSidebar open={true} menuItems={menuItems} user={user} title="Dashboard Participant" />
 
-            <Box component="main" sx={{ flexGrow: 1, backgroundColor: '#BBE1FA', minHeight: '100vh', p: 3 }}>
+            <Box component="main" sx={{ flexGrow: 1, backgroundColor: '#F4F7FE', minHeight: '100vh', p: 3 }}>
                 <Container maxWidth="xl" sx={{ mt: 8 }}>
                     {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
                     {success && <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess('')}>{success}</Alert>}

@@ -32,12 +32,13 @@ const ProfessionalTable = ({
         <TableContainer
             component={Paper}
             sx={{
-                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-                borderRadius: '12px',
-                overflow: 'hidden'
+                boxShadow: '0px 18px 40px rgba(112, 144, 176, 0.12)',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                border: 'none'
             }}
         >
-            <Table>
+            <Table sx={{ minWidth: 650 }}>
                 <TableHead>
                     <TableRow>
                         {columns.map((column) => (
@@ -45,13 +46,14 @@ const ProfessionalTable = ({
                                 key={column.id}
                                 align={column.align || 'left'}
                                 sx={{
-                                    backgroundColor: '#0F4C75',
-                                    color: '#FFFFFF',
-                                    fontWeight: 600,
+                                    backgroundColor: '#FFFFFF', // Clean White Header
+                                    color: '#A3AED0', // Grey Text
+                                    fontWeight: 700,
                                     textTransform: 'uppercase',
                                     fontSize: '0.75rem',
                                     letterSpacing: '0.05em',
-                                    py: 2
+                                    py: 2,
+                                    borderBottom: '1px solid #E9EDF7'
                                 }}
                             >
                                 {column.label}
@@ -61,13 +63,14 @@ const ProfessionalTable = ({
                             <TableCell
                                 align="right"
                                 sx={{
-                                    backgroundColor: '#0F4C75',
-                                    color: '#FFFFFF',
-                                    fontWeight: 600,
+                                    backgroundColor: '#FFFFFF',
+                                    color: '#A3AED0',
+                                    fontWeight: 700,
                                     textTransform: 'uppercase',
                                     fontSize: '0.75rem',
                                     letterSpacing: '0.05em',
-                                    py: 2
+                                    py: 2,
+                                    borderBottom: '1px solid #E9EDF7'
                                 }}
                             >
                                 Actions
@@ -94,7 +97,13 @@ const ProfessionalTable = ({
                                 key={row.id || index}
                                 sx={{
                                     '&:hover': {
-                                        backgroundColor: '#F9FAFB'
+                                        backgroundColor: '#F4F7FE' // Very light touch
+                                    },
+                                    '& td': {
+                                        color: '#1B254B', // Dark Navy Text
+                                        fontWeight: 600,
+                                        borderBottom: '1px solid #E9EDF7',
+                                        fontSize: '0.90rem'
                                     },
                                     '&:last-child td': {
                                         borderBottom: 0
@@ -118,9 +127,9 @@ const ProfessionalTable = ({
                                                     size="small"
                                                     onClick={() => onView(row)}
                                                     sx={{
-                                                        color: '#3282B8',
+                                                        color: '#4318FF',
                                                         '&:hover': {
-                                                            backgroundColor: 'rgba(50, 130, 184, 0.1)'
+                                                            backgroundColor: 'rgba(67, 24, 255, 0.1)'
                                                         }
                                                     }}
                                                 >
@@ -132,9 +141,9 @@ const ProfessionalTable = ({
                                                     size="small"
                                                     onClick={() => onEdit(row)}
                                                     sx={{
-                                                        color: '#3282B8',
+                                                        color: '#4318FF',
                                                         '&:hover': {
-                                                            backgroundColor: 'rgba(50, 130, 184, 0.1)'
+                                                            backgroundColor: 'rgba(67, 24, 255, 0.1)'
                                                         }
                                                     }}
                                                 >
@@ -146,9 +155,9 @@ const ProfessionalTable = ({
                                                     size="small"
                                                     onClick={() => onDelete(row)}
                                                     sx={{
-                                                        color: '#DC2626',
+                                                        color: '#E31A1A',
                                                         '&:hover': {
-                                                            backgroundColor: 'rgba(220, 38, 38, 0.1)'
+                                                            backgroundColor: 'rgba(227, 26, 26, 0.1)'
                                                         }
                                                     }}
                                                 >

@@ -237,7 +237,7 @@ const FormateurDashboard = () => {
                 }}
             />
 
-            <Box component="main" sx={{ flexGrow: 1, backgroundColor: '#F3F4F6', minHeight: '100vh', p: 3, display: 'flex', flexDirection: 'column' }}>
+            <Box component="main" sx={{ flexGrow: 1, backgroundColor: '#F4F7FE', minHeight: '100vh', p: 3, display: 'flex', flexDirection: 'column' }}>
                 <Container maxWidth="xl" sx={{ mt: 8 }}>
 
                     {/* Header Messages */}

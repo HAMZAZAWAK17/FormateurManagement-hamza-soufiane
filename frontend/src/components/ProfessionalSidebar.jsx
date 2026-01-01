@@ -15,12 +15,16 @@ import { useNavigate, useLocation } from 'react-router-dom';
  * Composant Sidebar professionnel
  * Design moderne avec fond #1E2A32
  */
-const ProfessionalSidebar = ({ open, onClose, menuItems, user, title }) => {
+const ProfessionalSidebar = ({ open, onClose, menuItems, user, title, onNavigate }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
     const handleNavigation = (path) => {
-        navigate(path);
+        if (onNavigate) {
+            onNavigate(path);
+        } else {
+            navigate(path);
+        }
         if (onClose) onClose();
     };
 
@@ -29,81 +33,86 @@ const ProfessionalSidebar = ({ open, onClose, menuItems, user, title }) => {
             variant="permanent"
             open={open}
             sx={{
-                width: 280,
+                width: 290,
                 flexShrink: 0,
                 '& .MuiDrawer-paper': {
-                    width: 280,
+                    width: 290,
                     boxSizing: 'border-box',
-                    backgroundColor: '#1E2A32',
+                    backgroundColor: '#111C44', // Dark Navy from image
                     color: '#FFFFFF',
-                    borderRight: 'none'
+                    borderRight: 'none',
+                    padding: '0 16px',
                 }
             }}
         >
-            {/* Header avec titre */}
-            <Box
-                sx={{
-                    p: 3,
-                    pb: 2
-                }}
-            >
-                <Typography
-                    variant="h5"
-                    fontWeight={700}
+            {/* Brand / Logo Area */}
+            <Box sx={{ p: 4, display: 'flex', alignItems: 'center', gap: 2, borderBottom: '1px solid rgba(255,255,255,0.1)', mb: 2 }}>
+                <Box
                     sx={{
-                        color: '#FFFFFF',
-                        mb: 0.5
+                        width: 40, height: 40,
+                        backgroundColor: '#4318FF', // Brand Blue
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '20px'
                     }}
                 >
-                    {title || 'Dashboard'}
-                </Typography>
-                {user && (
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            color: '#BBE1FA',
-                            opacity: 0.8
-                        }}
-                    >
-                        {user.prenom} {user.nom}
+                    GF
+                </Box>
+                <Box>
+                    <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: '0.5px' }}>
+                        GESTION
                     </Typography>
-                )}
+                    <Typography variant="caption" sx={{ color: '#A3AED0', fontWeight: 500 }}>
+                        FORMATION
+                    </Typography>
+                </Box>
             </Box>
 
-            <Divider sx={{ borderColor: 'rgba(187, 225, 250, 0.1)', mx: 2 }} />
-
             {/* Menu Items */}
-            <List sx={{ px: 2, py: 2 }}>
+            <List sx={{ px: 0 }}>
+                <Typography variant="caption" sx={{ pl: 2, mb: 1, display: 'block', color: '#A3AED0', fontWeight: 600, textTransform: 'uppercase' }}>
+                    MENU PRINCIPAL
+                </Typography>
+
                 {menuItems.map((item) => {
-                    const isSelected = location.pathname === item.path;
+                    // Vérification flexible pour l'état actif (exact match ou query param)
+                    const isSelected = location.pathname === item.path ||
+                        (location.search && item.path.includes(location.search));
 
                     return (
                         <ListItemButton
-                            key={item.path}
+                            key={item.label}
                             selected={isSelected}
                             onClick={() => handleNavigation(item.path)}
                             sx={{
-                                borderRadius: '8px',
+                                borderRadius: '12px',
                                 mb: 1,
                                 py: 1.5,
-                                px: 2,
-                                backgroundColor: isSelected ? 'rgba(50, 130, 184, 0.15)' : 'transparent',
-                                '&:hover': {
-                                    backgroundColor: isSelected
-                                        ? 'rgba(50, 130, 184, 0.25)'
-                                        : 'rgba(50, 130, 184, 0.08)'
-                                },
+                                px: 2.5,
+                                transition: 'all 0.2s',
+                                position: 'relative',
                                 '&.Mui-selected': {
-                                    backgroundColor: 'rgba(50, 130, 184, 0.15)',
+                                    backgroundColor: '#4318FF', // Active Blue
+                                    color: 'white',
                                     '&:hover': {
-                                        backgroundColor: 'rgba(50, 130, 184, 0.25)'
+                                        backgroundColor: '#3814D6',
+                                    },
+                                    '& .MuiListItemIcon-root': {
+                                        color: 'white',
                                     }
+                                },
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
                                 }
                             }}
                         >
                             <ListItemIcon
                                 sx={{
-                                    color: isSelected ? '#5BA3D0' : '#7BA5C0',
+                                    color: isSelected ? 'white' : '#A3AED0',
                                     minWidth: 40
                                 }}
                             >
@@ -113,14 +122,58 @@ const ProfessionalSidebar = ({ open, onClose, menuItems, user, title }) => {
                                 primary={item.label}
                                 primaryTypographyProps={{
                                     fontWeight: isSelected ? 600 : 500,
-                                    fontSize: '0.938rem',
-                                    color: '#FFFFFF'
+                                    fontSize: '0.95rem',
+                                    color: isSelected ? 'white' : '#A3AED0'
                                 }}
                             />
+                            {/* Active Indicator on right */}
+                            {isSelected && (
+                                <Box
+                                    sx={{
+                                        position: 'absolute',
+                                        right: -16, // to touch edge
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        width: 4,
+                                        height: 36,
+                                        backgroundColor: '#fff',
+                                        borderRadius: '4px 0 0 4px',
+                                        display: 'none' // Hidden for now, simpler design
+                                    }}
+                                />
+                            )}
                         </ListItemButton>
                     );
                 })}
             </List>
+
+            {/* User Info / Footer */}
+            <Box sx={{ mt: 'auto', mb: 4, p: 2, borderRadius: '16px', backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                {user && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Box
+                            sx={{
+                                width: 40, height: 40,
+                                borderRadius: '50%',
+                                backgroundColor: '#1B254B',
+                                border: '2px solid white',
+                                display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            {user.prenom?.charAt(0)}
+                        </Box>
+                        <Box>
+                            <Typography variant="button" display="block" sx={{ fontWeight: 700, textTransform: 'none' }}>
+                                {user.prenom} {user.nom}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: '#A3AED0', textTransform: 'capitalize' }}>
+                                {user.role}
+                            </Typography>
+                        </Box>
+                    </Box>
+                )}
+            </Box>
         </Drawer>
     );
 };
