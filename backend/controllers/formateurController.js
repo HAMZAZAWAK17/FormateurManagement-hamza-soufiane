@@ -108,6 +108,54 @@ export const getMesEtudiants = async (req, res) => {
     }
 };
 
+/**
+ * Récupérer les sessions d'un formateur (Legacy name)
+ * Note: Basé sur user_id comme getMesFormations
+ */
+export const getFormateurFormations = async (req, res) => {
+    try {
+        const [sessions] = await pool.query(`
+            SELECT s.*, f.titre as formation_titre
+            FROM sessions s
+            JOIN formations f ON s.formation_id = f.id
+            JOIN formateurs fmt ON s.formateur_id = fmt.id
+            WHERE fmt.user_id = ?
+            ORDER BY s.date_debut DESC
+        `, [req.params.id]);
+        res.json(sessions);
+    } catch (error) {
+        console.error('Erreur getFormateurFormations:', error);
+        res.status(500).json({ message: 'Erreur serveur' });
+    }
+};
+
+/**
+ * Récupérer les évaluations d'un formateur
+ */
+export const getFormateurEvaluations = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const [evaluations] = await pool.query(`
+            SELECT 
+                e.id, e.note, e.commentaire, e.created_at,
+                f.titre as formation_titre,
+                CONCAT(u.prenom, ' ', u.nom) as participant_nom
+            FROM evaluations e
+            INNER JOIN inscriptions i ON e.inscription_id = i.id
+            INNER JOIN sessions s ON i.session_id = s.id
+            INNER JOIN formations f ON s.formation_id = f.id
+            INNER JOIN users u ON i.participant_id = u.id
+            INNER JOIN formateurs fmt ON s.formateur_id = fmt.id
+            WHERE fmt.user_id = ?
+            ORDER BY e.created_at DESC
+        `, [userId]);
+        res.json(evaluations);
+    } catch (error) {
+        console.error('Erreur getFormateurEvaluations:', error);
+        res.status(500).json({ message: 'Erreur serveur' });
+    }
+};
+
 // --- GESTION RESSOURCES ---
 
 /**
