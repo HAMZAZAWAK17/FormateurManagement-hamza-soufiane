@@ -63,6 +63,13 @@ const FormateurDashboard = () => {
     const [stats, setStats] = useState({ totalSessions: 0, nextSession: null, avgNote: 0, totalStudents: 0 });
     const [notifications, setNotifications] = useState([]);
 
+    // Sync Tab with URL
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const tab = params.get('tab');
+        if (tab) setCurrentTab(parseInt(tab));
+    }, [location.search]);
+
     // UI States
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
