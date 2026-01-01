@@ -29,6 +29,32 @@ export const getAllSessions = async (req, res) => {
 };
 
 /**
+ * Récupérer les sessions d'un formateur spécifique (via user_id)
+ */
+export const getSessionsByFormateur = async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        const [sessions] = await pool.query(`
+            SELECT 
+                s.*,
+                f.titre as formation_titre,
+                f.heures as formation_heures
+            FROM sessions s
+            INNER JOIN formations f ON s.formation_id = f.id
+            INNER JOIN formateurs fmt ON s.formateur_id = fmt.id
+            WHERE fmt.user_id = ?
+            ORDER BY s.date_debut ASC
+        `, [userId]);
+
+        res.json(sessions);
+    } catch (error) {
+        console.error('Erreur sessions formateur:', error);
+        res.status(500).json({ message: 'Erreur serveur' });
+    }
+};
+
+/**
  * Créer une nouvelle session (Admin uniquement)
  */
 export const createSession = async (req, res) => {

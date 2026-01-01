@@ -1,6 +1,7 @@
 import express from 'express';
 import {
     getAllSessions,
+    getSessionsByFormateur,
     createSession,
     updateSession,
     deleteSession
@@ -15,6 +16,9 @@ const router = express.Router();
 
 // GET /api/sessions - Récupérer toutes les sessions
 router.get('/', getAllSessions);
+
+// GET /api/sessions/formateur/:id - Récupérer les sessions d'un formateur (via user_id)
+router.get('/formateur/:id', authMiddleware, getSessionsByFormateur);
 
 // POST /api/sessions - Créer une session (Admin uniquement)
 router.post('/', authMiddleware, roleMiddleware('admin'), createSession);

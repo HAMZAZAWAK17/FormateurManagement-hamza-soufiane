@@ -95,6 +95,35 @@ export const getMesEvaluations = async (req, res) => {
 };
 
 /**
+ * Récupérer les évaluations d'un formateur (via user_id)
+ */
+export const getEvaluationsByFormateur = async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        const [evaluations] = await pool.query(`
+            SELECT 
+                e.id, e.note, e.commentaire, e.created_at,
+                f.titre as formation_titre,
+                CONCAT(u.prenom, ' ', u.nom) as participant_nom
+            FROM evaluations e
+            INNER JOIN inscriptions i ON e.inscription_id = i.id
+            INNER JOIN sessions s ON i.session_id = s.id
+            INNER JOIN formations f ON s.formation_id = f.id
+            INNER JOIN users u ON i.participant_id = u.id
+            INNER JOIN formateurs fmt ON s.formateur_id = fmt.id
+            WHERE fmt.user_id = ?
+            ORDER BY e.created_at DESC
+        `, [userId]);
+
+        res.json(evaluations);
+    } catch (error) {
+        console.error('Erreur évaluations formateur:', error);
+        res.status(500).json({ message: 'Erreur serveur' });
+    }
+};
+
+/**
  * Récupérer toutes les évaluations (Admin uniquement)
  */
 export const getAllEvaluations = async (req, res) => {

@@ -7,21 +7,27 @@ export const getAllFormations = async (req, res) => {
     try {
         const { categorie, ville } = req.query;
 
-        let query = 'SELECT * FROM formations WHERE 1=1';
+        let query = `
+            SELECT f.*, CONCAT(u.prenom, ' ', u.nom) as formateur_nom
+            FROM formations f
+            LEFT JOIN formateurs fmt ON f.formateur_id = fmt.id
+            LEFT JOIN users u ON fmt.user_id = u.id
+            WHERE 1=1
+        `;
         const params = [];
 
         // Filtres optionnels
         if (categorie) {
-            query += ' AND categorie = ?';
+            query += ' AND f.categorie = ?';
             params.push(categorie);
         }
 
         if (ville) {
-            query += ' AND ville = ?';
+            query += ' AND f.ville = ?';
             params.push(ville);
         }
 
-        query += ' ORDER BY created_at DESC';
+        query += ' ORDER BY f.created_at DESC';
 
         const [formations] = await pool.query(query, params);
         res.json(formations);
@@ -40,7 +46,11 @@ export const getAllFormations = async (req, res) => {
 export const getFormationById = async (req, res) => {
     try {
         const [formations] = await pool.query(
-            'SELECT * FROM formations WHERE id = ?',
+            `SELECT f.*, CONCAT(u.prenom, ' ', u.nom) as formateur_nom
+             FROM formations f
+             LEFT JOIN formateurs fmt ON f.formateur_id = fmt.id
+             LEFT JOIN users u ON fmt.user_id = u.id
+             WHERE f.id = ?`,
             [req.params.id]
         );
 
@@ -65,7 +75,7 @@ export const getFormationById = async (req, res) => {
  */
 export const createFormation = async (req, res) => {
     try {
-        const { titre, description, heures, cout, objectifs, programme, categorie, ville } = req.body;
+        const { titre, description, heures, cout, objectifs, programme, categorie, ville, formateur_id } = req.body;
 
         // Validation
         if (!titre || !heures || !cout) {
@@ -75,9 +85,9 @@ export const createFormation = async (req, res) => {
         }
 
         const [result] = await pool.query(
-            `INSERT INTO formations (titre, description, heures, cout, objectifs, programme, categorie, ville) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [titre, description, heures, cout, objectifs, programme, categorie, ville]
+            `INSERT INTO formations (titre, description, heures, cout, objectifs, programme, categorie, ville, formateur_id) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [titre, description, heures, cout, objectifs, programme, categorie, ville, formateur_id || null]
         );
 
         res.status(201).json({
@@ -98,14 +108,14 @@ export const createFormation = async (req, res) => {
  */
 export const updateFormation = async (req, res) => {
     try {
-        const { titre, description, heures, cout, objectifs, programme, categorie, ville } = req.body;
+        const { titre, description, heures, cout, objectifs, programme, categorie, ville, formateur_id } = req.body;
 
         const [result] = await pool.query(
             `UPDATE formations 
        SET titre = ?, description = ?, heures = ?, cout = ?, 
-           objectifs = ?, programme = ?, categorie = ?, ville = ?
+           objectifs = ?, programme = ?, categorie = ?, ville = ?, formateur_id = ?
        WHERE id = ?`,
-            [titre, description, heures, cout, objectifs, programme, categorie, ville, req.params.id]
+            [titre, description, heures, cout, objectifs, programme, categorie, ville, formateur_id || null, req.params.id]
         );
 
         if (result.affectedRows === 0) {

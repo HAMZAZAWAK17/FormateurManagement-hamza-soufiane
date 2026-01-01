@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
  */
 export const register = async (req, res) => {
     try {
-        const { nom, prenom, email, password, role, telephone } = req.body;
+        const { nom, prenom, email, password, role, telephone, specialite, bio } = req.body;
 
         // Validation simple
         if (!nom || !prenom || !email || !password || !role) {
@@ -38,11 +38,11 @@ export const register = async (req, res) => {
             [nom, prenom, email, hashedPassword, role, telephone]
         );
 
-        // Si c'est un formateur, créer son profil
+        // Si c'est un formateur, créer son profil avec les détails
         if (role === 'formateur') {
             await pool.query(
-                'INSERT INTO formateurs (user_id) VALUES (?)',
-                [result.insertId]
+                'INSERT INTO formateurs (user_id, competences, remarques) VALUES (?, ?, ?)',
+                [result.insertId, specialite || null, bio || null]
             );
         }
 
@@ -149,6 +149,125 @@ export const getProfile = async (req, res) => {
 
     } catch (error) {
         console.error('Erreur lors de la récupération du profil:', error);
+        res.status(500).json({
+            message: 'Erreur serveur'
+        });
+    }
+};
+
+/**
+ * Demande de réinitialisation de mot de passe
+ * Génère un token de réinitialisation valide 1 heure
+ */
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                message: 'Email requis'
+            });
+        }
+
+        // Vérifier si l'utilisateur existe
+        const [users] = await pool.query(
+            'SELECT id, nom, prenom, email FROM users WHERE email = ?',
+            [email]
+        );
+
+        if (users.length === 0) {
+            // Pour des raisons de sécurité, on ne révèle pas si l'email existe
+            return res.json({
+                message: 'Si cet email existe, un lien de réinitialisation a été envoyé'
+            });
+        }
+
+        const user = users[0];
+
+        // Générer un token de réinitialisation (valide 1 heure)
+        const resetToken = jwt.sign(
+            {
+                id: user.id,
+                email: user.email,
+                type: 'reset_password'
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        // Dans une vraie application, vous enverriez un email ici
+        console.log(`🔐 Token de réinitialisation pour ${email}:`, resetToken);
+
+        res.json({
+            message: 'Un lien de réinitialisation a été généré',
+            resetToken, // UNIQUEMENT POUR LE DÉVELOPPEMENT
+            resetLink: `http://localhost:5173/reset-password?token=${resetToken}`
+        });
+
+    } catch (error) {
+        console.error('Erreur lors de la demande de réinitialisation:', error);
+        res.status(500).json({
+            message: 'Erreur serveur'
+        });
+    }
+};
+
+/**
+ * Réinitialisation du mot de passe avec token
+ */
+export const resetPassword = async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+
+        if (!token || !newPassword) {
+            return res.status(400).json({
+                message: 'Token et nouveau mot de passe requis'
+            });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({
+                message: 'Le mot de passe doit contenir au moins 6 caractères'
+            });
+        }
+
+        // Vérifier et décoder le token
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+            if (decoded.type !== 'reset_password') {
+                return res.status(400).json({
+                    message: 'Token invalide'
+                });
+            }
+        } catch (err) {
+            return res.status(400).json({
+                message: 'Token invalide ou expiré'
+            });
+        }
+
+        // Hasher le nouveau mot de passe
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Mettre à jour le mot de passe
+        const [result] = await pool.query(
+            'UPDATE users SET password = ? WHERE id = ?',
+            [hashedPassword, decoded.id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                message: 'Utilisateur non trouvé'
+            });
+        }
+
+        res.json({
+            message: 'Mot de passe réinitialisé avec succès'
+        });
+
+    } catch (error) {
+        console.error('Erreur lors de la réinitialisation:', error);
         res.status(500).json({
             message: 'Erreur serveur'
         });
