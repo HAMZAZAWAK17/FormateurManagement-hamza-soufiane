@@ -105,9 +105,7 @@ const ParticipantDashboard = () => {
     const handleSubmitEvaluation = async () => {
         try {
             await evaluationService.create({
-                participant_id: user.id, // Optionnel si backend prend user.id du token, mais je le passe au cas où
-                formation_id: selectedInscription.formation_id,
-                session_id: selectedInscription.session_id,
+                inscription_id: selectedInscription.id,
                 note: evalForm.note,
                 commentaire: evalForm.commentaire
             });
@@ -240,8 +238,15 @@ const ParticipantDashboard = () => {
                                                         </Button>
                                                     )}
 
-                                                    {inscription.statut === 'confirmee' && isSessionTerminee(inscription) && !inscription.a_evalue && (
-                                                        <Button variant="contained" size="small" startIcon={<StarIcon />} onClick={() => handleEvaluer(inscription)}>
+                                                    {inscription.statut === 'confirmee' && !inscription.a_evalue && (
+                                                        <Button
+                                                            variant="contained"
+                                                            size="small"
+                                                            color="success"
+                                                            startIcon={<StarIcon />}
+                                                            onClick={() => handleEvaluer(inscription)}
+                                                            sx={{ ml: 1 }}
+                                                        >
                                                             Évaluer
                                                         </Button>
                                                     )}
