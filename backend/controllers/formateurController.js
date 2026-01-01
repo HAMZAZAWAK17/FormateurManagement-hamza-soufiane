@@ -62,6 +62,20 @@ export const updateFormateur = async (req, res) => {
 };
 
 /**
+ * Supprimer un formateur
+ */
+export const deleteFormateur = async (req, res) => {
+    try {
+        const [result] = await pool.query('DELETE FROM formateurs WHERE id = ?', [req.params.id]);
+        if (result.affectedRows === 0) return res.status(404).json({ message: 'Formateur non trouvé' });
+        res.json({ message: 'Formateur supprimé' });
+    } catch (error) {
+        console.error('Erreur deleteFormateur:', error);
+        res.status(500).json({ message: 'Erreur serveur' });
+    }
+};
+
+/**
  * Récupérer les formations assignées au formateur (via user_id)
  */
 export const getMesFormations = async (req, res) => {

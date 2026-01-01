@@ -67,6 +67,10 @@ const AdminDashboard = () => {
     const [selectedFormation, setSelectedFormation] = useState(null);
     const [selectedFormateur, setSelectedFormateur] = useState(null);
 
+    // Edit Mode State
+    const [editingFormationId, setEditingFormationId] = useState(null);
+    const [editingFormateurId, setEditingFormateurId] = useState(null);
+
     // Forms
     const [sessionForm, setSessionForm] = useState({
         formation_id: '',
@@ -189,27 +193,113 @@ const AdminDashboard = () => {
                 heures: parseInt(formationForm.heures),
                 cout: parseFloat(formationForm.cout)
             };
-            await formationService.create(payload);
-            setSuccess('Formation créée avec succès');
+
+            if (editingFormationId) {
+                await formationService.update(editingFormationId, payload);
+                setSuccess('Formation mise à jour avec succès');
+            } else {
+                await formationService.create(payload);
+                setSuccess('Formation créée avec succès');
+            }
+
             setFormationDialogOpen(false);
             setFormationForm({ titre: '', description: '', categorie: '', heures: '', cout: '', ville: '', objectifs: '', programme: '', formateur_id: '' });
+            setEditingFormationId(null);
             loadData();
         } catch (err) {
             console.error(err);
-            setError("Erreur lors de la création de la formation.");
+            setError("Erreur lors de la sauvegarde de la formation.");
         }
     };
 
     const handleCreateFormateur = async () => {
         try {
-            // Attention: specialite envoyé au backend qui le mappe sur 'competences'
-            await authService.register({ ...formateurForm, role: 'formateur' });
-            setSuccess('Formateur créé avec succès');
+            if (editingFormateurId) {
+                // Update
+                const payload = {
+                    competences: formateurForm.specialite,
+                    remarques: formateurForm.bio
+                };
+                await formateurService.update(editingFormateurId, payload);
+                setSuccess('Formateur mis à jour avec succès');
+            } else {
+                // Create
+                // Attention: specialite envoyé au backend qui le mappe sur 'competences'
+                await authService.register({ ...formateurForm, role: 'formateur' });
+                setSuccess('Formateur créé avec succès');
+            }
+
             setFormateurDialogOpen(false);
             setFormateurForm({ prenom: '', nom: '', email: '', password: '', telephone: '', specialite: '', bio: '' });
+            setEditingFormateurId(null);
             loadData();
         } catch (err) {
-            setError("Erreur lors de la création du formateur (Email peut-être déjà utilisé)");
+            setError("Erreur lors de la sauvegarde du formateur (Email peut-être déjà utilisé)");
+        }
+    };
+
+    // Actions Handlers
+    const handleOpenCreateFormation = () => {
+        setEditingFormationId(null);
+        setFormationForm({ titre: '', description: '', categorie: '', heures: '', cout: '', ville: '', objectifs: '', programme: '', formateur_id: '' });
+        setFormationDialogOpen(true);
+    };
+
+    const handleEditFormationAction = (formation) => {
+        setFormationForm({
+            titre: formation.titre || '',
+            description: formation.description || '',
+            categorie: formation.categorie || '',
+            heures: formation.heures || '',
+            cout: formation.cout || '',
+            ville: formation.ville || '',
+            objectifs: formation.objectifs || '',
+            programme: formation.programme || '',
+            formateur_id: formation.formateur_id || ''
+        });
+        setEditingFormationId(formation.id);
+        setFormationDialogOpen(true);
+    };
+
+    const handleDeleteFormationAction = async (formation) => {
+        if (!window.confirm(`Voulez-vous vraiment supprimer la formation "${formation.titre}" ?`)) return;
+        try {
+            await formationService.delete(formation.id);
+            setSuccess('Formation supprimée avec succès');
+            loadData();
+        } catch (err) {
+            setError('Erreur lors de la suppression de la formation');
+        }
+    };
+
+    const handleOpenCreateFormateur = () => {
+        setEditingFormateurId(null);
+        setFormateurForm({ prenom: '', nom: '', email: '', password: '', telephone: '', specialite: '', bio: '' });
+        setFormateurDialogOpen(true);
+    };
+
+    const handleEditFormateurAction = (formateur) => {
+        setFormateurForm({
+            prenom: formateur.prenom || '',
+            nom: formateur.nom || '',
+            email: formateur.email || '',
+            password: '', // On ne préremplit pas le mot de passe
+            telephone: formateur.telephone || '',
+            specialite: formateur.competences || '',
+            bio: formateur.remarques || ''
+        });
+        setEditingFormateurId(formateur.id);
+        setFormateurDialogOpen(true);
+    };
+
+    const handleDeleteFormateurAction = async (formateur) => {
+        if (!window.confirm(`Voulez-vous vraiment supprimer le formateur "${formateur.prenom} ${formateur.nom}" ?`)) return;
+        try {
+            await formateurService.delete(formateur.id);
+            setSuccess('Formateur supprimé avec succès');
+            loadData();
+        } catch (err) {
+            setError('Erreur lors de la suppression du formateur');
         }
     };
 

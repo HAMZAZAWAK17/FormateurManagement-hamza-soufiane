@@ -77,7 +77,8 @@ export const formateurService = {
     getMyStudents: (id) => api.get(`/formateurs/${id}/etudiants`),
     addRessource: (data) => api.post(`/formateurs/ressources`, data),
     getRessources: (formationId) => api.get(`/formateurs/formations/${formationId}/ressources`),
-    deleteRessource: (id) => api.delete(`/formateurs/ressources/${id}`)
+    deleteRessource: (id) => api.delete(`/formateurs/ressources/${id}`),
+    delete: (id) => api.delete(`/formateurs/${id}`)
 };
 
 /**

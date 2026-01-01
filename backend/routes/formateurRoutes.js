@@ -9,7 +9,8 @@ import {
     getMesEtudiants,
     addRessource,
     getRessources,
-    deleteRessource
+    deleteRessource,
+    deleteFormateur
 } from '../controllers/formateurController.js';
 import { authMiddleware, roleMiddleware } from '../middleware/auth.js';
 
@@ -27,6 +28,9 @@ router.get('/:id', authMiddleware, getFormateurById);
 
 // PUT /api/formateurs/:id - Mettre à jour un formateur (Admin uniquement)
 router.put('/:id', authMiddleware, roleMiddleware('admin'), updateFormateur);
+
+// DELETE /api/formateurs/:id - Supprimer un formateur (Admin uniquement)
+router.delete('/:id', authMiddleware, roleMiddleware('admin'), deleteFormateur);
 
 // GET /api/formateurs/:id/formations - Récupérer les SESSIONS d'un formateur (Legacy name)
 router.get('/:id/formations', authMiddleware, getFormateurFormations);
