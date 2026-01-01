@@ -31,6 +31,8 @@ import EventIcon from '@mui/icons-material/Event';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExploreIcon from '@mui/icons-material/Explore';
 import { inscriptionService, evaluationService, formationService, sessionService } from '../services/api';
+import Notifications from './Notifications';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import dayjs from 'dayjs';
 
 const ParticipantDashboard = () => {
@@ -57,10 +59,12 @@ const ParticipantDashboard = () => {
     const [evalForm, setEvalForm] = useState({ note: 0, commentaire: '' });
 
     const isEvaluationsPage = location.pathname.includes('/evaluations');
+    const isNotificationsPage = location.pathname.includes('/notifications');
 
     const menuItems = [
         { path: '/participant', label: 'Mes Formations', icon: <DashboardIcon /> },
-        { path: '/participant/evaluations', label: 'Mes Évaluations', icon: <StarIcon /> }
+        { path: '/participant/evaluations', label: 'Mes Évaluations', icon: <StarIcon /> },
+        { path: '/participant/notifications', label: 'Notifications', icon: <NotificationsIcon /> }
     ];
 
     useEffect(() => {
@@ -171,7 +175,8 @@ const ParticipantDashboard = () => {
                     {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
                     {success && <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess('')}>{success}</Alert>}
 
-                    {!isEvaluationsPage ? (
+                    {/* View: DASHBOARD */}
+                    {!isEvaluationsPage && !isNotificationsPage && (
                         <>
                             {/* Header Actions */}
                             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
@@ -257,8 +262,10 @@ const ParticipantDashboard = () => {
                                 </Box>
                             </Paper>
                         </>
-                    ) : (
-                        /* Vue Evaluations */
+                    )}
+
+                    {/* View: EVALUATIONS */}
+                    {isEvaluationsPage && (
                         <Paper sx={{ p: 3, borderRadius: '12px' }}>
                             <Typography variant="h6" fontWeight={600} gutterBottom>Historique de mes évaluations</Typography>
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -274,6 +281,9 @@ const ParticipantDashboard = () => {
                             </Box>
                         </Paper>
                     )}
+
+                    {/* View: NOTIFICATIONS */}
+                    {isNotificationsPage && <Notifications />}
 
                     {/* Dialog Catalogue */}
                     <Dialog open={catalogueOpen} onClose={() => setCatalogueOpen(false)} maxWidth="md" fullWidth>

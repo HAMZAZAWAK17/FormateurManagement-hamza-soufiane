@@ -10,6 +10,7 @@ import formateurRoutes from './routes/formateurRoutes.js';
 import sessionRoutes from './routes/sessionRoutes.js';
 import inscriptionRoutes from './routes/inscriptionRoutes.js';
 import evaluationRoutes from './routes/evaluationRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 
 // Configuration
 dotenv.config();
@@ -36,6 +37,7 @@ app.use('/api/formateurs', formateurRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/inscriptions', inscriptionRoutes);
 app.use('/api/evaluations', evaluationRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 /**
  * Route de santé (health check)

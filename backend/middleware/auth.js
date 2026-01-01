@@ -1,12 +1,9 @@
 import jwt from 'jsonwebtoken';
 
-/**
- * Middleware d'authentification JWT
- * Vérifie la présence et la validité du token
- */
+
 export const authMiddleware = (req, res, next) => {
     try {
-        // Récupérer le token depuis le header Authorization
+ // Récupérer le token depuis le header Authorization
         const authHeader = req.headers.authorization;
 
         if (!authHeader || !authHeader.startsWith('Bearer ')) {

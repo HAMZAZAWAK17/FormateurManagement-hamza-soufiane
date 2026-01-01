@@ -10,7 +10,12 @@ export const inscrireParticipant = async (req, res) => {
 
         // Vérifier si la session existe et a des places disponibles
         const [sessions] = await pool.query(
-            'SELECT places_disponibles FROM sessions WHERE id = ?',
+            `SELECT 
+                s.places_disponibles, s.formateur_id, f.titre as formation_titre, fmt.user_id as formateur_user_id 
+             FROM sessions s 
+             JOIN formations f ON s.formation_id = f.id 
+             LEFT JOIN formateurs fmt ON s.formateur_id = fmt.id 
+             WHERE s.id = ?`,
             [session_id]
         );
 
@@ -20,7 +25,9 @@ export const inscrireParticipant = async (req, res) => {
             });
         }
 
-        if (sessions[0].places_disponibles <= 0) {
+        const session = sessions[0];
+
+        if (session.places_disponibles <= 0) {
             return res.status(400).json({
                 message: 'Aucune place disponible pour cette session'
             });
@@ -38,7 +45,7 @@ export const inscrireParticipant = async (req, res) => {
             });
         }
 
-        // Créer l'inscription
+        // Créer l'inscription a_evalue par défaut false
         const [result] = await pool.query(
             'INSERT INTO inscriptions (session_id, participant_id, statut) VALUES (?, ?, ?)',
             [session_id, participant_id, 'confirmee']
@@ -49,6 +56,31 @@ export const inscrireParticipant = async (req, res) => {
             'UPDATE sessions SET places_disponibles = places_disponibles - 1 WHERE id = ?',
             [session_id]
         );
+
+        // ---------------- NOTIFICATIONS ----------------
+        // 1. Notifier les ADMINS
+        const [admins] = await pool.query("SELECT id FROM users WHERE role = 'admin'");
+        for (const admin of admins) {
+            await pool.query(
+                'INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)',
+                [admin.id, `Nouvelle inscription : Un participant s'est inscrit à "${session.formation_titre}".`, 'info']
+            );
+        }
+
+        // 2. Notifier le FORMATEUR (si assigné)
+        if (session.formateur_user_id) {
+            await pool.query(
+                'INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)',
+                [session.formateur_user_id, `Nouveau participant inscrit à votre formation "${session.formation_titre}".`, 'info']
+            );
+        }
+
+        // 3. Notifier le PARTICIPANT
+        await pool.query(
+            'INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)',
+            [participant_id, `Inscription confirmée pour la formation "${session.formation_titre}".`, 'success']
+        );
+        // ----------------------------------------------
 
         res.status(201).json({
             message: 'Inscription réussie',

@@ -114,4 +114,12 @@ export const evaluationService = {
     getAll: () => api.get('/evaluations')
 };
 
+/**
+ * Services pour les notifications
+ */
+export const notificationService = {
+    getAll: () => api.get('/notifications'),
+    markAllRead: () => api.put('/notifications/read-all')
+};
+
 export default api;

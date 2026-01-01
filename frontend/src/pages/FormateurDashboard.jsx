@@ -48,6 +48,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 import { sessionService, evaluationService, formateurService } from '../services/api';
 import dayjs from 'dayjs';
+import Notifications from './Notifications';
 
 const FormateurDashboard = () => {
     const { user } = useAuth();
@@ -74,11 +75,14 @@ const FormateurDashboard = () => {
     const [currentResources, setCurrentResources] = useState([]);
     const [resourceForm, setResourceForm] = useState({ titre: '', type: 'PDF', url: '', description: '' });
 
+    // ...
+
     const menuItems = [
         { path: '?tab=0', label: 'Dashboard', icon: <DashboardIcon /> },
         { path: '?tab=1', label: 'Mes Formations', icon: <SchoolIcon /> },
         { path: '?tab=2', label: 'Mes Étudiants', icon: <GroupIcon /> },
-        { path: '?tab=3', label: 'Évaluations', icon: <StarIcon /> }
+        { path: '?tab=3', label: 'Évaluations', icon: <StarIcon /> },
+        { path: '?tab=4', label: 'Notifications', icon: <NotificationsActiveIcon /> }
     ];
 
     useEffect(() => {
@@ -252,6 +256,7 @@ const FormateurDashboard = () => {
                             <Tab icon={<SchoolIcon />} label="Mes Formations" iconPosition="start" />
                             <Tab icon={<GroupIcon />} label="Mes Étudiants" iconPosition="start" />
                             <Tab icon={<StarIcon />} label="Évaluations" iconPosition="start" />
+                            <Tab icon={<NotificationsActiveIcon />} label="Notifications" iconPosition="start" />
                         </Tabs>
 
                         <Box sx={{ p: 4, minHeight: '500px' }}>
@@ -321,6 +326,9 @@ const FormateurDashboard = () => {
                                     ))}
                                 </Grid>
                             )}
+
+                            {/* TAB 4: NOTIFICATIONS */}
+                            {currentTab === 4 && <Notifications />}
                         </Box>
                     </Paper>
                 </Container>
