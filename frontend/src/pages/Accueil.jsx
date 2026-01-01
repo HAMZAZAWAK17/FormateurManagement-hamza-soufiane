@@ -68,37 +68,56 @@ const Accueil = () => {
     };
 
     return (
-        <>
-            {/* Barre de navigation */}
-            <AppBar position="static" sx={{ mb: 4 }}>
-                <Toolbar>
-                    <SchoolIcon sx={{ mr: 2 }} />
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        Centre de Formation
-                    </Typography>
-                    <Button color="inherit" onClick={() => navigate('/login')}>
-                        Connexion
-                    </Button>
-                    <Button color="inherit" onClick={() => navigate('/register')}>
-                        Inscription
-                    </Button>
+        <Box sx={{ backgroundColor: '#F4F7FE', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            {/* Barre de navigation Moderne */}
+            <AppBar position="static" sx={{ backgroundColor: 'transparent', boxShadow: 'none', pt: 2 }}>
+                <Toolbar sx={{ justifyContent: 'space-between' }}>
+                    <Box display="flex" alignItems="center" gap={1}>
+                        <Box sx={{ width: 40, height: 40, bgcolor: '#4318FF', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
+                            GF
+                        </Box>
+                        <Typography variant="h6" fontWeight={800} color="#1B254B">
+                            GESTION FORMATION
+                        </Typography>
+                    </Box>
+                    <Box>
+                        <Button
+                            onClick={() => navigate('/login')}
+                            sx={{ color: '#1B254B', fontWeight: 700, mr: 2 }}
+                        >
+                            Connexion
+                        </Button>
+                        <Button
+                            variant="contained"
+                            onClick={() => navigate('/register')}
+                            sx={{
+                                bgcolor: '#4318FF',
+                                borderRadius: '30px',
+                                px: 3,
+                                boxShadow: '0px 4px 12px rgba(67, 24, 255, 0.4)',
+                                '&:hover': { bgcolor: '#3814D6' }
+                            }}
+                        >
+                            Inscription
+                        </Button>
+                    </Box>
                 </Toolbar>
             </AppBar>
 
-            <Container maxWidth="lg" sx={{ py: 4 }}>
-                {/* En-tête */}
-                <Box textAlign="center" mb={6}>
-                    <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
+            <Container maxWidth="lg" sx={{ py: 6, flexGrow: 1 }}>
+                {/* Hero Section Simplifiée */}
+                <Box textAlign="center" mb={8}>
+                    <Typography variant="h3" component="h1" gutterBottom fontWeight={800} color="#1B254B">
                         Catalogue de Formations
                     </Typography>
-                    <Typography variant="h6" color="text.secondary" paragraph>
-                        Découvrez nos formations professionnelles et développez vos compétences
+                    <Typography variant="h6" color="#A3AED0" paragraph maxWidth="md" mx="auto">
+                        Explorez nos formations professionnelles et boostez votre carrière avec des experts certifiés.
                     </Typography>
                 </Box>
 
-                {/* Filtres */}
-                <Box mb={4}>
-                    <Grid container spacing={2}>
+                {/* Filtres Card */}
+                <Box mb={6} p={3} sx={{ bgcolor: 'white', borderRadius: '20px', boxShadow: '0px 18px 40px rgba(112, 144, 176, 0.12)' }}>
+                    <Grid container spacing={2} alignItems="center">
                         <Grid item xs={12} md={6}>
                             <TextField
                                 fullWidth
@@ -107,6 +126,8 @@ const Accueil = () => {
                                 name="categorie"
                                 value={filtres.categorie}
                                 onChange={handleFiltreChange}
+                                variant="outlined"
+                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
                             >
                                 <MenuItem value="">Toutes les catégories</MenuItem>
                                 <MenuItem value="Informatique">Informatique</MenuItem>
@@ -124,6 +145,8 @@ const Accueil = () => {
                                 name="ville"
                                 value={filtres.ville}
                                 onChange={handleFiltreChange}
+                                variant="outlined"
+                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
                             >
                                 <MenuItem value="">Toutes les villes</MenuItem>
                                 <MenuItem value="Casablanca">Casablanca</MenuItem>
@@ -138,10 +161,10 @@ const Accueil = () => {
 
                 {/* Liste des formations */}
                 {loading ? (
-                    <Typography textAlign="center">Chargement...</Typography>
+                    <Typography textAlign="center" color="#A3AED0">Chargement...</Typography>
                 ) : formations.length === 0 ? (
-                    <Typography textAlign="center" color="text.secondary">
-                        Aucune formation disponible
+                    <Typography textAlign="center" color="#A3AED0">
+                        Aucune formation disponible pour le moment.
                     </Typography>
                 ) : (
                     <Grid container spacing={3}>
@@ -150,76 +173,93 @@ const Accueil = () => {
                             return (
                                 <Grid item xs={12} md={6} lg={4} key={formation.id}>
                                     <Card
-                                        elevation={3}
+                                        elevation={0}
                                         sx={{
                                             height: '100%',
                                             display: 'flex',
                                             flexDirection: 'column',
-                                            transition: 'transform 0.2s',
+                                            borderRadius: '20px',
+                                            backgroundColor: 'white',
+                                            boxShadow: '0px 18px 40px rgba(112, 144, 176, 0.12)',
+                                            transition: 'all 0.3s',
                                             '&:hover': {
-                                                transform: 'translateY(-4px)',
-                                                boxShadow: 6
+                                                transform: 'translateY(-5px)',
+                                                boxShadow: '0px 25px 50px rgba(112, 144, 176, 0.2)'
                                             }
                                         }}
                                     >
-                                        <CardContent sx={{ flexGrow: 1 }}>
-                                            <Typography variant="h6" component="h2" gutterBottom fontWeight="bold">
+                                        <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                                            <Box display="flex" justifyContent="space-between" alignItems="start" mb={2}>
+                                                <Box
+                                                    sx={{
+                                                        width: 50, height: 50,
+                                                        borderRadius: '50%',
+                                                        bgcolor: '#F4F7FE',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        color: '#4318FF'
+                                                    }}
+                                                >
+                                                    <SchoolIcon />
+                                                </Box>
+                                                {formation.categorie && (
+                                                    <Chip
+                                                        label={formation.categorie}
+                                                        size="small"
+                                                        sx={{
+                                                            bgcolor: '#F4F7FE',
+                                                            color: '#4318FF',
+                                                            fontWeight: 700,
+                                                            borderRadius: '8px'
+                                                        }}
+                                                    />
+                                                )}
+                                            </Box>
+
+                                            <Typography variant="h6" component="h2" gutterBottom fontWeight={700} color="#1B254B">
                                                 {formation.titre}
                                             </Typography>
 
-                                            {formation.categorie && (
-                                                <Chip
-                                                    label={formation.categorie}
-                                                    size="small"
-                                                    color="primary"
-                                                    sx={{ mb: 2 }}
-                                                />
-                                            )}
-
-                                            <Typography variant="body2" color="text.secondary" paragraph>
+                                            <Typography variant="body2" color="#A3AED0" paragraph sx={{ mb: 3 }}>
                                                 {formation.description || 'Description non disponible'}
                                             </Typography>
 
-                                            <Box sx={{ mt: 2 }}>
-                                                <Box display="flex" alignItems="center" mb={1}>
-                                                    <AccessTimeIcon fontSize="small" sx={{ mr: 1 }} />
-                                                    <Typography variant="body2">
+                                            <Box sx={{ mt: 'auto' }}>
+                                                <Box display="flex" alignItems="center" mb={1} gap={1} color="#A3AED0">
+                                                    <AccessTimeIcon fontSize="small" />
+                                                    <Typography variant="body2" fontWeight={500}>
                                                         {formation.heures} heures
                                                     </Typography>
                                                 </Box>
-
-                                                <Box display="flex" alignItems="center" mb={1}>
-                                                    <EuroIcon fontSize="small" sx={{ mr: 1 }} />
-                                                    <Typography variant="body2">
+                                                <Box display="flex" alignItems="center" mb={1} gap={1} color="#A3AED0">
+                                                    <EuroIcon fontSize="small" />
+                                                    <Typography variant="body2" fontWeight={500}>
                                                         {formation.cout} DH
                                                     </Typography>
                                                 </Box>
-
                                                 {formation.ville && (
-                                                    <Box display="flex" alignItems="center">
-                                                        <LocationOnIcon fontSize="small" sx={{ mr: 1 }} />
-                                                        <Typography variant="body2">
+                                                    <Box display="flex" alignItems="center" gap={1} color="#A3AED0">
+                                                        <LocationOnIcon fontSize="small" />
+                                                        <Typography variant="body2" fontWeight={500}>
                                                             {formation.ville}
                                                         </Typography>
                                                     </Box>
                                                 )}
                                             </Box>
-
-                                            {formationSessions.length > 0 && (
-                                                <Box mt={2}>
-                                                    <Typography variant="caption" color="success.main" fontWeight="bold">
-                                                        {formationSessions.length} session(s) disponible(s)
-                                                    </Typography>
-                                                </Box>
-                                            )}
                                         </CardContent>
 
-                                        <CardActions>
+                                        <CardActions sx={{ p: 3, pt: 0 }}>
                                             <Button
-                                                size="small"
                                                 variant="contained"
                                                 fullWidth
                                                 onClick={() => navigate('/login')}
+                                                sx={{
+                                                    bgcolor: '#4318FF',
+                                                    borderRadius: '12px',
+                                                    fontWeight: 700,
+                                                    py: 1.5,
+                                                    boxShadow: '0px 4px 12px rgba(67, 24, 255, 0.4)',
+                                                    '&:hover': { bgcolor: '#3814D6' }
+                                                }}
                                             >
                                                 S'inscrire
                                             </Button>
@@ -231,7 +271,12 @@ const Accueil = () => {
                     </Grid>
                 )}
             </Container>
-        </>
+
+            {/* Footer Simple */}
+            <Box py={4} textAlign="center" color="#A3AED0">
+                <Typography variant="body2">© 2025 Gestion Formation. Tous droits réservés.</Typography>
+            </Box>
+        </Box>
     );
 };
 

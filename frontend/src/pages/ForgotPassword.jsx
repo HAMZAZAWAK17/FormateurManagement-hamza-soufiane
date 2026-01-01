@@ -48,7 +48,7 @@ const ForgotPassword = () => {
             sx={{
                 minHeight: '100vh',
                 display: 'flex',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                background: '#F4F7FE'
             }}
         >
             {/* Partie gauche - Illustration */}
@@ -58,18 +58,10 @@ const ForgotPassword = () => {
                     display: { xs: 'none', md: 'flex' },
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: 'linear-gradient(135deg, #1a237e 0%, #4a148c 100%)',
+                    background: '#4318FF',
                     position: 'relative',
                     overflow: 'hidden',
-                    '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        width: '200%',
-                        height: '200%',
-                        background: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
-                        backgroundSize: '30px 30px',
-                        animation: 'moveBackground 20s linear infinite'
-                    }
+                    borderBottomRightRadius: '100px'
                 }}
             >
                 <Box
@@ -85,7 +77,6 @@ const ForgotPassword = () => {
                         sx={{
                             fontWeight: 800,
                             mb: 2,
-                            textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
                         }}
                     >
                         Mot de passe oublié ?
@@ -93,8 +84,8 @@ const ForgotPassword = () => {
                     <Typography
                         variant="h5"
                         sx={{
-                            opacity: 0.9,
-                            fontWeight: 300,
+                            opacity: 0.8,
+                            fontWeight: 400,
                             mb: 4
                         }}
                     >
@@ -111,55 +102,58 @@ const ForgotPassword = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: '#ffffff',
+                    backgroundColor: '#F4F7FE',
                     p: { xs: 3, sm: 4 }
                 }}
             >
                 <Box
                     sx={{
                         width: '100%',
-                        maxWidth: '450px'
+                        maxWidth: '450px',
+                        bgcolor: 'white',
+                        p: 5,
+                        borderRadius: '20px',
+                        boxShadow: '0px 18px 40px rgba(112, 144, 176, 0.12)'
                     }}
                 >
                     {/* Logo et titre */}
-                    <Box textAlign="center" mb={4}>
+                    <Box textAlign="start" mb={4}>
                         <Typography
                             variant="h3"
                             sx={{
                                 fontWeight: 700,
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                backgroundClip: 'text',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                mb: 1
+                                color: '#1B254B',
+                                mb: 1,
+                                fontSize: '2rem'
                             }}
                         >
-                            FORMATION
+                            Réinitialisation
                         </Typography>
                         <Typography
                             variant="h5"
                             sx={{
-                                color: '#2d3748',
+                                color: '#1B254B',
                                 fontWeight: 600,
-                                mb: 1
+                                mb: 1,
+                                fontSize: '1.2rem'
                             }}
                         >
-                            Réinitialiser le mot de passe
+                            Mot de passe perdu
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="#A3AED0">
                             Entrez votre email pour recevoir un lien de réinitialisation
                         </Typography>
                     </Box>
 
                     {error && (
-                        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+                        <Alert severity="error" sx={{ mb: 3, borderRadius: '12px' }}>
                             {error}
                         </Alert>
                     )}
 
                     {success && (
                         <Box>
-                            <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>
+                            <Alert severity="success" sx={{ mb: 2, borderRadius: '12px' }}>
                                 Un lien de réinitialisation a été généré !
                             </Alert>
                             {resetLink && (
@@ -167,7 +161,7 @@ const ForgotPassword = () => {
                                     severity="info"
                                     sx={{
                                         mb: 3,
-                                        borderRadius: 2,
+                                        borderRadius: '12px',
                                         '& .MuiAlert-message': {
                                             width: '100%'
                                         }
@@ -180,8 +174,8 @@ const ForgotPassword = () => {
                                         sx={{
                                             mt: 1,
                                             p: 2,
-                                            backgroundColor: '#f7fafc',
-                                            borderRadius: 1,
+                                            backgroundColor: '#F4F7FE',
+                                            borderRadius: '10px',
                                             wordBreak: 'break-all'
                                         }}
                                     >
@@ -189,7 +183,7 @@ const ForgotPassword = () => {
                                             href={resetLink}
                                             underline="hover"
                                             sx={{
-                                                color: '#667eea',
+                                                color: '#4318FF',
                                                 fontWeight: 600
                                             }}
                                         >
@@ -198,7 +192,7 @@ const ForgotPassword = () => {
                                     </Box>
                                     <Typography
                                         variant="caption"
-                                        color="text.secondary"
+                                        color="#A3AED0"
                                         sx={{ mt: 1, display: 'block' }}
                                     >
                                         En production, ce lien serait envoyé par email
@@ -215,11 +209,11 @@ const ForgotPassword = () => {
                                     variant="body2"
                                     sx={{
                                         mb: 1,
-                                        fontWeight: 600,
-                                        color: '#2d3748'
+                                        fontWeight: 500,
+                                        color: '#1B254B'
                                     }}
                                 >
-                                    EMAIL
+                                    Email*
                                 </Typography>
                                 <TextField
                                     fullWidth
@@ -227,25 +221,22 @@ const ForgotPassword = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
-                                    placeholder="votre.email@example.com"
+                                    placeholder="mail@exemple.com"
                                     autoFocus
+                                    variant="outlined"
                                     InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <EmailIcon sx={{ color: '#a0aec0' }} />
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <EmailIcon sx={{ color: '#A3AED0' }} />
                                             </InputAdornment>
                                         )
                                     }}
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2,
-                                            backgroundColor: '#f7fafc',
-                                            '&:hover': {
-                                                backgroundColor: '#edf2f7'
-                                            },
-                                            '&.Mui-focused': {
-                                                backgroundColor: '#ffffff'
-                                            }
+                                            borderRadius: '16px',
+                                            '& fieldset': { borderColor: '#E0E5F2' },
+                                            '&:hover fieldset': { borderColor: '#4318FF' },
+                                            '&.Mui-focused fieldset': { borderColor: '#4318FF' }
                                         }
                                     }}
                                 />
@@ -259,15 +250,18 @@ const ForgotPassword = () => {
                                 disabled={loading}
                                 sx={{
                                     py: 1.5,
-                                    borderRadius: 2,
+                                    borderRadius: '16px',
                                     textTransform: 'none',
                                     fontSize: '1rem',
-                                    fontWeight: 600,
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+                                    fontWeight: 700,
+                                    backgroundColor: '#4318FF',
+                                    boxShadow: '0 4px 15px rgba(67, 24, 255, 0.4)',
                                     '&:hover': {
-                                        background: 'linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%)',
-                                        boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)'
+                                        backgroundColor: '#3814D6'
+                                    },
+                                    '&:disabled': {
+                                        backgroundColor: '#E0E5F2',
+                                        color: '#A3AED0'
                                     }
                                 }}
                             >
@@ -275,36 +269,21 @@ const ForgotPassword = () => {
                             </Button>
 
                             <Box textAlign="center" mt={3}>
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography variant="body2" color="#1B254B">
                                     Vous vous souvenez de votre mot de passe ?{' '}
                                     <MuiLink
                                         component={Link}
                                         to="/login"
                                         underline="none"
                                         sx={{
-                                            color: '#667eea',
-                                            fontWeight: 600,
+                                            color: '#4318FF',
+                                            fontWeight: 700,
                                             '&:hover': {
-                                                color: '#764ba2'
+                                                color: '#2B3674'
                                             }
                                         }}
                                     >
                                         Se connecter
-                                    </MuiLink>
-                                </Typography>
-                                <Typography variant="body2" sx={{ mt: 2 }}>
-                                    <MuiLink
-                                        component={Link}
-                                        to="/"
-                                        underline="none"
-                                        sx={{
-                                            color: '#a0aec0',
-                                            '&:hover': {
-                                                color: '#667eea'
-                                            }
-                                        }}
-                                    >
-                                        ← Retour à l'accueil
                                     </MuiLink>
                                 </Typography>
                             </Box>
