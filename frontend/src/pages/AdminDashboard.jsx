@@ -402,7 +402,7 @@ const AdminDashboard = () => {
                                         <Button
                                             variant="contained"
                                             startIcon={<SchoolIcon />}
-                                            onClick={() => setFormationDialogOpen(true)}
+                                            onClick={handleOpenCreateFormation}
                                             sx={{ backgroundColor: '#0F4C75' }}
                                         >
                                             Nouvelle Formation
@@ -412,6 +412,8 @@ const AdminDashboard = () => {
                                         columns={formationColumns}
                                         data={formations}
                                         onView={handleViewFormation}
+                                        onEdit={handleEditFormationAction}
+                                        onDelete={handleDeleteFormationAction}
                                         emptyMessage="Aucune formation trouvée"
                                     />
                                 </Box>
@@ -425,7 +427,7 @@ const AdminDashboard = () => {
                                         <Button
                                             variant="contained"
                                             startIcon={<PeopleIcon />}
-                                            onClick={() => setFormateurDialogOpen(true)}
+                                            onClick={handleOpenCreateFormateur}
                                             sx={{ backgroundColor: '#0F4C75' }}
                                         >
                                             Nouveau Formateur
@@ -435,6 +437,8 @@ const AdminDashboard = () => {
                                         columns={formateurColumns}
                                         data={formateurs}
                                         onView={handleViewFormateur}
+                                        onEdit={handleEditFormateurAction}
+                                        onDelete={handleDeleteFormateurAction}
                                         emptyMessage="Aucun formateur trouvé"
                                     />
                                 </Box>
@@ -507,7 +511,7 @@ const AdminDashboard = () => {
 
             {/* DIALOG FORMATION */}
             <Dialog open={formationDialogOpen} onClose={() => setFormationDialogOpen(false)} maxWidth="md" fullWidth>
-                <DialogTitle>Nouvelle Formation</DialogTitle>
+                <DialogTitle>{editingFormationId ? 'Modifier Formation' : 'Nouvelle Formation'}</DialogTitle>
                 <DialogContent>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
                         <TextField
@@ -590,7 +594,9 @@ const AdminDashboard = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setFormationDialogOpen(false)}>Annuler</Button>
-                    <Button onClick={handleCreateFormation} variant="contained">Créer</Button>
+                    <Button onClick={handleCreateFormation} variant="contained">
+                        {editingFormationId ? 'Mettre à jour' : 'Créer'}
+                    </Button>
                 </DialogActions>
             </Dialog>
 
@@ -647,7 +653,7 @@ const AdminDashboard = () => {
 
             {/* DIALOG CREATION FORMATEUR */}
             <Dialog open={formateurDialogOpen} onClose={() => setFormateurDialogOpen(false)} maxWidth="sm" fullWidth>
-                <DialogTitle>Nouveau Formateur</DialogTitle>
+                <DialogTitle>{editingFormateurId ? 'Modifier Formateur' : 'Nouveau Formateur'}</DialogTitle>
                 <DialogContent>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
                         <Box sx={{ display: 'flex', gap: 2 }}>
@@ -656,12 +662,14 @@ const AdminDashboard = () => {
                                 value={formateurForm.prenom}
                                 onChange={e => setFormateurForm({ ...formateurForm, prenom: e.target.value })}
                                 fullWidth required
+                                disabled={!!editingFormateurId}
                             />
                             <TextField
                                 label="Nom"
                                 value={formateurForm.nom}
                                 onChange={e => setFormateurForm({ ...formateurForm, nom: e.target.value })}
                                 fullWidth required
+                                disabled={!!editingFormateurId}
                             />
                         </Box>
                         <TextField
@@ -669,28 +677,32 @@ const AdminDashboard = () => {
                             value={formateurForm.email}
                             onChange={e => setFormateurForm({ ...formateurForm, email: e.target.value })}
                             fullWidth required
+                            disabled={!!editingFormateurId}
                         />
-                        <TextField
-                            type={showPassword ? 'text' : 'password'}
-                            label="Mot de passe"
-                            value={formateurForm.password}
-                            onChange={e => setFormateurForm({ ...formateurForm, password: e.target.value })}
-                            fullWidth required
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                                            {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                )
-                            }}
-                        />
+                        {!editingFormateurId && (
+                            <TextField
+                                type={showPassword ? 'text' : 'password'}
+                                label="Mot de passe"
+                                value={formateurForm.password}
+                                onChange={e => setFormateurForm({ ...formateurForm, password: e.target.value })}
+                                fullWidth required
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                                                {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }}
+                            />
+                        )}
                         <TextField
                             label="Téléphone"
                             value={formateurForm.telephone}
                             onChange={e => setFormateurForm({ ...formateurForm, telephone: e.target.value })}
                             fullWidth
+                            disabled={!!editingFormateurId}
                         />
                         <TextField
                             label="Spécialité"
@@ -708,7 +720,9 @@ const AdminDashboard = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setFormateurDialogOpen(false)}>Annuler</Button>
-                    <Button onClick={handleCreateFormateur} variant="contained">Créer</Button>
+                    <Button onClick={handleCreateFormateur} variant="contained">
+                        {editingFormateurId ? 'Mettre à jour' : 'Créer'}
+                    </Button>
                 </DialogActions>
             </Dialog>
 

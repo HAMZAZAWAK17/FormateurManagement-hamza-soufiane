@@ -73,9 +73,10 @@ export const getMesInscriptions = async (req, res) => {
         const [inscriptions] = await pool.query(`
       SELECT 
         i.id, i.statut, i.date_inscription,
-        s.date_debut, s.date_fin, s.lieu,
-        f.titre, f.description, f.heures,
-        CONCAT(u.prenom, ' ', u.nom) as formateur_nom
+        s.id as session_id, s.date_debut as session_date_debut, s.date_fin as session_date_fin, s.lieu,
+        f.id as formation_id, f.titre as formation_titre, f.description, f.heures,
+        CONCAT(u.prenom, ' ', u.nom) as formateur_nom,
+        (SELECT COUNT(*) FROM evaluations e WHERE e.inscription_id = i.id) > 0 as a_evalue
       FROM inscriptions i
       INNER JOIN sessions s ON i.session_id = s.id
       INNER JOIN formations f ON s.formation_id = f.id
