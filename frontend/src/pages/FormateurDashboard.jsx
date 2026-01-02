@@ -160,15 +160,33 @@ const FormateurDashboard = () => {
 
     const handleAddResource = async () => {
         try {
-            await formateurService.addRessource({ ...resourceForm, formation_id: selectedFormationId });
+            let fileUrl = resourceForm.url;
+
+            if (resourceForm.file) {
+                const formData = new FormData();
+                formData.append('file', resourceForm.file);
+
+                // Upload file first
+                const uploadRes = await formateurService.uploadFile(formData);
+                fileUrl = uploadRes.data.url;
+            }
+
+            await formateurService.addRessource({
+                ...resourceForm,
+                url: fileUrl,
+                formation_id: selectedFormationId
+            });
+
             setSuccess('Ressource ajoutée !');
             setResourceDialogOpen(false);
-            setResourceForm({ titre: '', type: 'PDF', url: '', description: '' });
+            setResourceForm({ titre: '', type: 'PDF', url: '', description: '', file: null });
+
             // Reload list
             const res = await formateurService.getRessources(selectedFormationId);
             setCurrentResources(res.data);
         } catch (err) {
-            setError("Erreur d'ajout.");
+            console.error(err);
+            setError("Erreur d'ajout ou d'upload.");
         }
     };
 
@@ -409,12 +427,41 @@ const FormateurDashboard = () => {
                             <MenuItem value="DOC">Document Word</MenuItem>
                             <MenuItem value="LINK">Lien Web</MenuItem>
                         </TextField>
-                        <TextField
-                            label="URL / Lien" fullWidth
-                            value={resourceForm.url}
-                            onChange={e => setResourceForm({ ...resourceForm, url: e.target.value })}
-                            helperText="Lien vers le fichier (Drive, Dropbox, YouTube...)"
-                        />
+
+                        {resourceForm.type === 'LINK' || resourceForm.type === 'VIDEO' ? (
+                            <TextField
+                                label="URL / Lien" fullWidth
+                                value={resourceForm.url}
+                                onChange={e => setResourceForm({ ...resourceForm, url: e.target.value })}
+                                helperText="Lien vers la vidéo ou le site"
+                            />
+                        ) : (
+                            <Box>
+                                <Button
+                                    variant="outlined"
+                                    component="label"
+                                    fullWidth
+                                >
+                                    {resourceForm.file ? resourceForm.file.name : "Choisir un fichier"}
+                                    <input
+                                        type="file"
+                                        hidden
+                                        accept={resourceForm.type === 'PDF' ? '.pdf' : '.doc,.docx'}
+                                        onChange={(e) => {
+                                            if (e.target.files[0]) {
+                                                setResourceForm({ ...resourceForm, file: e.target.files[0] });
+                                            }
+                                        }}
+                                    />
+                                </Button>
+                                {resourceForm.file && (
+                                    <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                                        Fichier sélectionné : {resourceForm.file.name}
+                                    </Typography>
+                                )}
+                            </Box>
+                        )}
+
                         <TextField
                             label="Description" fullWidth multiline rows={2}
                             value={resourceForm.description}

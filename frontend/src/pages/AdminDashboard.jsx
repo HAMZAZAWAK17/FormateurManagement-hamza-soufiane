@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import dayjs from 'dayjs';
 import {
     Box,
     Container,
@@ -182,13 +183,22 @@ const AdminDashboard = () => {
 
     const handleCreateSession = async () => {
         try {
-            await sessionService.create(sessionForm);
+            // Sanitize payload to avoid 'Incorrect integer value' errors
+            const payload = {
+                ...sessionForm,
+                formation_id: parseInt(sessionForm.formation_id),
+                formateur_id: sessionForm.formateur_id ? parseInt(sessionForm.formateur_id) : null,
+                // Ensure dates are valid strings (mysql usually handles 'YYYY-MM-DDTHH:mm' fine)
+            };
+
+            await sessionService.create(payload);
             setSuccess('Session créée avec succès');
             setSessionDialogOpen(false);
             setSessionForm({ formation_id: '', formateur_id: '', date_debut: '', date_fin: '', lieu: '' });
             loadData();
         } catch (err) {
-            setError('Erreur lors de la création de la session');
+            console.error('Error creating session:', err.response?.data || err.message);
+            setError(err.response?.data?.message || 'Erreur lors de la création de la session');
         }
     };
 
@@ -336,16 +346,52 @@ const AdminDashboard = () => {
     ];
 
     const inscriptionColumns = [
-        { id: 'formation_titre', label: 'Formation' },
-        { id: 'participant_nom', label: 'Participant' },
-        { id: 'date_inscription', label: 'Date', render: r => dayjs(r.date_inscription).format('DD/MM/YYYY') },
+        {
+            id: 'participant',
+            label: 'Participant',
+            render: (row) => (
+                <Box>
+                    <Typography variant="subtitle2" fontWeight={600} sx={{ color: '#1B254B' }}>{row.participant_nom}</Typography>
+                    <Typography variant="caption" sx={{ color: '#A3AED0' }}>{row.participant_email}</Typography>
+                </Box>
+            )
+        },
+        {
+            id: 'formation',
+            label: 'Session / Formation',
+            render: (row) => (
+                <Box>
+                    <Typography variant="body2" fontWeight={600} color="primary">{row.formation_titre}</Typography>
+                    <Typography variant="caption" display="block" sx={{ color: '#A3AED0' }}>
+                        📅 {dayjs(row.date_debut).format('DD MMM')} - {dayjs(row.date_fin).format('DD MMM YYYY')}
+                    </Typography>
+                </Box>
+            )
+        },
+        {
+            id: 'formateur_nom',
+            label: 'Formateur',
+            render: r => (
+                <Typography variant="body2" sx={{ color: r.formateur_nom ? '#1B254B' : '#A3AED0', fontStyle: r.formateur_nom ? 'normal' : 'italic' }}>
+                    {r.formateur_nom || 'Non assigné'}
+                </Typography>
+            )
+        },
+        { id: 'lieu', label: 'Lieu', render: r => r.lieu || 'En ligne' },
+        { id: 'date_inscription', label: 'Inscrit le', render: r => dayjs(r.date_inscription).format('DD/MM/YYYY') },
         {
             id: 'statut',
             label: 'Statut',
             render: r => (
                 <Chip
-                    label={r.statut}
-                    color={r.statut === 'confirmee' ? 'success' : r.statut === 'en_attente' ? 'warning' : 'error'}
+                    label={r.statut === 'confirmee' ? 'Confirmée' : r.statut === 'en_attente' ? 'En attente' : 'Annulée'}
+                    sx={{
+                        bgcolor: r.statut === 'confirmee' ? 'rgba(5, 205, 153, 0.1)' : r.statut === 'en_attente' ? 'rgba(255, 181, 71, 0.1)' : 'rgba(238, 93, 80, 0.1)',
+                        color: r.statut === 'confirmee' ? '#05CD99' : r.statut === 'en_attente' ? '#FFB547' : '#EE5D50',
+                        fontWeight: 700,
+                        borderRadius: '8px',
+                        border: 'none'
+                    }}
                     size="small"
                 />
             )

@@ -37,7 +37,18 @@ app.use('/api/formateurs', formateurRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/inscriptions', inscriptionRoutes);
 app.use('/api/evaluations', evaluationRoutes);
+app.use('/api/evaluations', evaluationRoutes);
 app.use('/api/notifications', notificationRoutes);
+
+import uploadRoutes from './routes/uploadRoutes.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/upload', uploadRoutes);
 
 /**
  * Route de santé (health check)

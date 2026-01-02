@@ -180,14 +180,17 @@ export const getAllInscriptions = async (req, res) => {
         const [inscriptions] = await pool.query(`
       SELECT 
         i.id, i.statut, i.date_inscription,
-        s.date_debut, s.date_fin,
+        s.date_debut, s.date_fin, s.lieu,
         f.titre as formation_titre,
-        CONCAT(u.prenom, ' ', u.nom) as participant_nom,
-        u.email as participant_email
+        CONCAT(u_part.prenom, ' ', u_part.nom) as participant_nom,
+        u_part.email as participant_email,
+        CONCAT(u_form.prenom, ' ', u_form.nom) as formateur_nom
       FROM inscriptions i
       INNER JOIN sessions s ON i.session_id = s.id
       INNER JOIN formations f ON s.formation_id = f.id
-      INNER JOIN users u ON i.participant_id = u.id
+      INNER JOIN users u_part ON i.participant_id = u_part.id
+      LEFT JOIN formateurs fmt ON s.formateur_id = fmt.id
+      LEFT JOIN users u_form ON fmt.user_id = u_form.id
       ORDER BY i.date_inscription DESC
     `);
 

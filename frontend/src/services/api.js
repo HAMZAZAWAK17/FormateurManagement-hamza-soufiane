@@ -78,6 +78,7 @@ export const formateurService = {
     addRessource: (data) => api.post(`/formateurs/ressources`, data),
     getRessources: (formationId) => api.get(`/formateurs/formations/${formationId}/ressources`),
     deleteRessource: (id) => api.delete(`/formateurs/ressources/${id}`),
+    uploadFile: (formData) => api.post('/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
     delete: (id) => api.delete(`/formateurs/${id}`)
 };
 

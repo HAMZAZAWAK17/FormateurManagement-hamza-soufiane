@@ -16,7 +16,13 @@ import {
     TextField,
     Accordion,
     AccordionSummary,
-    AccordionDetails
+    AccordionDetails,
+    List,
+    ListItem,
+    ListItemText,
+    ListItemAvatar,
+    Avatar,
+    IconButton
 } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -30,7 +36,10 @@ import StarIcon from '@mui/icons-material/Star';
 import EventIcon from '@mui/icons-material/Event';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExploreIcon from '@mui/icons-material/Explore';
-import { inscriptionService, evaluationService, formationService, sessionService } from '../services/api';
+import DescriptionIcon from '@mui/icons-material/Description';
+import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
+import LinkIcon from '@mui/icons-material/Link';
+import { inscriptionService, evaluationService, formationService, sessionService, formateurService } from '../services/api';
 import Notifications from './Notifications';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import dayjs from 'dayjs';
@@ -57,6 +66,10 @@ const ParticipantDashboard = () => {
 
     const [selectedInscription, setSelectedInscription] = useState(null);
     const [evalForm, setEvalForm] = useState({ note: 0, commentaire: '' });
+
+    // Resources State
+    const [resourceDialogOpen, setResourceDialogOpen] = useState(false);
+    const [currentResources, setCurrentResources] = useState([]);
 
     const isEvaluationsPage = location.pathname.includes('/evaluations');
     const isNotificationsPage = location.pathname.includes('/notifications');
@@ -141,6 +154,16 @@ const ParticipantDashboard = () => {
             loadData();
         } catch (err) {
             setError("Erreur lors de l'annulation");
+        }
+    };
+
+    const handleViewResources = async (formationId) => {
+        try {
+            const res = await formateurService.getRessources(formationId);
+            setCurrentResources(res.data);
+            setResourceDialogOpen(true);
+        } catch (err) {
+            setError('Impossible de charger les ressources.');
         }
     };
 
@@ -243,17 +266,28 @@ const ParticipantDashboard = () => {
                                                         </Button>
                                                     )}
 
-                                                    {inscription.statut === 'confirmee' && !inscription.a_evalue && (
-                                                        <Button
-                                                            variant="contained"
-                                                            size="small"
-                                                            color="success"
-                                                            startIcon={<StarIcon />}
-                                                            onClick={() => handleEvaluer(inscription)}
-                                                            sx={{ ml: 1 }}
-                                                        >
-                                                            Évaluer
-                                                        </Button>
+                                                    {inscription.statut === 'confirmee' && (
+                                                        <>
+                                                            <Button
+                                                                size="small"
+                                                                variant="outlined"
+                                                                startIcon={<DescriptionIcon />}
+                                                                onClick={() => handleViewResources(inscription.formation_id)}
+                                                            >
+                                                                Ressources
+                                                            </Button>
+                                                            {!inscription.a_evalue && (
+                                                                <Button
+                                                                    variant="contained"
+                                                                    size="small"
+                                                                    color="success"
+                                                                    startIcon={<StarIcon />}
+                                                                    onClick={() => handleEvaluer(inscription)}
+                                                                >
+                                                                    Évaluer
+                                                                </Button>
+                                                            )}
+                                                        </>
                                                     )}
                                                 </Box>
                                             </Paper>
@@ -362,6 +396,36 @@ const ParticipantDashboard = () => {
                         <DialogActions>
                             <Button onClick={() => setEvalDialogOpen(false)}>Annuler</Button>
                             <Button onClick={handleSubmitEvaluation} variant="contained" disabled={evalForm.note === 0}>Envoyer</Button>
+                        </DialogActions>
+                    </Dialog>
+                    {/* Dialog Resources */}
+                    <Dialog open={resourceDialogOpen} onClose={() => setResourceDialogOpen(false)} maxWidth="md" fullWidth>
+                        <DialogTitle sx={{ bgcolor: '#0F4C75', color: 'white' }}>
+                            Ressources Pédagogiques
+                        </DialogTitle>
+                        <DialogContent>
+                            <List>
+                                {currentResources.length === 0 ? (
+                                    <Typography sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>Aucune ressource disponible pour cette formation.</Typography>
+                                ) : currentResources.map(res => (
+                                    <React.Fragment key={res.id}>
+                                        <ListItem>
+                                            <ListItemAvatar>
+                                                <Avatar sx={{ bgcolor: res.type === 'VIDEO' ? '#F44336' : '#2196F3' }}>
+                                                    {res.type === 'VIDEO' ? <VideoLibraryIcon /> : <DescriptionIcon />}
+                                                </Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText
+                                                primary={<a href={res.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: '#1E2A32', fontWeight: 'bold' }}>{res.titre}</a>}
+                                                secondary={`${res.type} - ${res.description || ''}`}
+                                            />
+                                        </ListItem>
+                                    </React.Fragment>
+                                ))}
+                            </List>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => setResourceDialogOpen(false)}>Fermer</Button>
                         </DialogActions>
                     </Dialog>
                 </Container>
