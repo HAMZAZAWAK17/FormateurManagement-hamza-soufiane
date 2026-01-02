@@ -60,53 +60,102 @@ const ProfessionalCalendar = ({
                 elevation={0}
                 sx={{
                     p: 3,
-                    borderRadius: '12px',
-                    border: '1px solid #E5E7EB',
+                    borderRadius: '20px',
+                    backgroundColor: 'white',
+                    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)',
                     '& .fc': {
-                        fontFamily: 'Inter, Roboto, sans-serif'
+                        fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif"
+                    },
+                    '& .fc-theme-standard td, & .fc-theme-standard th': {
+                        borderColor: '#E9EDF7'
+                    },
+                    '& .fc-col-header-cell': {
+                        padding: '12px 0'
+                    },
+                    '& .fc-col-header-cell-cushion': {
+                        color: '#A3AED0',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        fontSize: '0.75rem',
+                        letterSpacing: '0.5px'
                     },
                     '& .fc-toolbar-title': {
-                        fontSize: '1.25rem',
-                        fontWeight: 600,
-                        color: '#1E2A32'
+                        fontSize: '1.5rem',
+                        fontWeight: 700,
+                        color: '#1B254B',
+                        textTransform: 'capitalize'
                     },
                     '& .fc-button': {
-                        backgroundColor: '#0F4C75',
+                        backgroundColor: '#F4F7FE',
+                        color: '#4318FF',
                         border: 'none',
                         textTransform: 'none',
-                        fontWeight: 500,
+                        fontWeight: 600,
+                        borderRadius: '10px',
+                        padding: '8px 16px',
+                        boxShadow: 'none',
+                        transition: 'all 0.2s',
                         '&:hover': {
-                            backgroundColor: '#0A3552'
+                            backgroundColor: '#4318FF',
+                            color: 'white'
                         },
                         '&:focus': {
                             boxShadow: 'none'
                         }
                     },
                     '& .fc-button-active': {
-                        backgroundColor: '#0A3552'
+                        backgroundColor: '#4318FF !important',
+                        color: 'white !important'
+                    },
+                    '& .fc-prev-button, & .fc-next-button': {
+                        backgroundColor: '#F4F7FE',
+                        color: '#1B254B',
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        padding: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        '&:hover': {
+                            backgroundColor: '#E9EDF7',
+                            color: '#4318FF'
+                        }
                     },
                     '& .fc-daygrid-day-number': {
-                        color: '#1E2A32',
-                        fontWeight: 500
-                    },
-                    '& .fc-col-header-cell-cushion': {
-                        color: '#6B7280',
+                        color: '#1B254B',
                         fontWeight: 600,
-                        textTransform: 'uppercase',
-                        fontSize: '0.75rem'
+                        padding: '8px 12px'
                     },
-                    '& .fc-event': {
-                        borderRadius: '4px',
-                        padding: '2px 4px',
-                        fontSize: '0.813rem',
-                        fontWeight: 500,
-                        cursor: 'pointer'
-                    },
-                    '& .fc-daygrid-day-top': {
-                        justifyContent: 'center'
+                    '& .fc-daygrid-day': {
+                        transition: 'background-color 0.2s',
+                        '&:hover': {
+                            backgroundColor: '#F7F9FF'
+                        }
                     },
                     '& .fc-daygrid-day.fc-day-today': {
-                        backgroundColor: 'rgba(50, 130, 184, 0.1)'
+                        backgroundColor: '#F4F7FE !important'
+                    },
+                    '& .fc-event': {
+                        borderRadius: '6px',
+                        padding: '4px 8px',
+                        border: 'none',
+                        boxShadow: '0 2px 4px rgba(67, 24, 255, 0.15)',
+                        fontSize: '0.813rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'transform 0.1s',
+                        '&:hover': {
+                            transform: 'translateY(-1px)',
+                            boxShadow: '0 4px 8px rgba(67, 24, 255, 0.25)'
+                        }
+                    },
+                    '& .fc-event-main': {
+                        color: 'white'
+                    },
+                    // Remove today yellow highlight default
+                    '& .fc-highlight': {
+                        backgroundColor: '#E9EDF7'
                     }
                 }}
             >
@@ -130,7 +179,8 @@ const ProfessionalCalendar = ({
                     editable={editable}
                     selectable={selectable}
                     selectMirror={true}
-                    dayMaxEvents={true}
+                    dayMaxEvents={2}
+                    moreLinkContent={(args) => `+ ${args.num} autres`}
                     weekends={true}
                     height={height}
                     contentHeight="auto"

@@ -53,6 +53,7 @@ import Notifications from './Notifications';
 const FormateurDashboard = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation(); // Fixed: Added missing location hook
     const [currentTab, setCurrentTab] = useState(0);
 
     // Data States
