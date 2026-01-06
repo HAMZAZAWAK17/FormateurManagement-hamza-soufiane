@@ -215,22 +215,79 @@ evaluations
 11. Mise à jour de l'UI (Frontend)
 ```
 
-## 📦 Dépendances Clés
+## 📦 Bibliothèques et Dépendances
 
-### Backend
-- **express** : Framework web
-- **mysql2** : Driver MySQL avec support Promise
-- **bcryptjs** : Hashage des mots de passe
-- **jsonwebtoken** : Génération et vérification JWT
-- **cors** : Gestion des requêtes cross-origin
-- **dotenv** : Variables d'environnement
+### 🔧 Backend (Node.js/Express)
 
-### Frontend
-- **react** : Bibliothèque UI
-- **react-router-dom** : Routing
-- **@mui/material** : Composants Material UI
-- **axios** : Client HTTP
-- **@emotion/react** : Styling (requis par MUI)
+#### **Dépendances de Production**
+| Bibliothèque | Version | Description |
+|--------------|---------|-------------|
+| **express** | ^4.18.2 | Framework web minimaliste et flexible pour Node.js |
+| **mysql2** | ^3.6.5 | Driver MySQL avec support Promise et requêtes préparées |
+| **bcryptjs** | ^2.4.3 | Hashage sécurisé des mots de passe (10 rounds) |
+| **jsonwebtoken** | ^9.0.2 | Génération et vérification de tokens JWT pour l'authentification |
+| **cors** | ^2.8.5 | Middleware pour gérer les requêtes cross-origin (CORS) |
+| **dotenv** | ^16.3.1 | Chargement des variables d'environnement depuis fichier .env |
+| **express-validator** | ^7.0.1 | Middleware de validation et sanitisation des données entrantes |
+| **multer** | ^2.0.2 | Middleware pour gérer l'upload de fichiers multipart/form-data |
+
+#### **Dépendances de Développement**
+| Bibliothèque | Version | Description |
+|--------------|---------|-------------|
+| **nodemon** | ^3.0.2 | Redémarrage automatique du serveur lors des modifications de code |
+
+---
+
+### 🎨 Frontend (React/Vite)
+
+#### **Dépendances de Production**
+
+**Framework & Core**
+| Bibliothèque | Version | Description |
+|--------------|---------|-------------|
+| **react** | ^18.2.0 | Bibliothèque JavaScript pour construire des interfaces utilisateur |
+| **react-dom** | ^18.2.0 | Package pour manipuler le DOM avec React |
+| **react-router-dom** | ^6.20.1 | Routing déclaratif pour applications React (navigation) |
+
+**UI & Styling**
+| Bibliothèque | Version | Description |
+|--------------|---------|-------------|
+| **@mui/material** | ^5.15.0 | Composants React Material Design (UI principale) |
+| **@mui/icons-material** | ^5.15.0 | Bibliothèque d'icônes Material Design |
+| **@emotion/react** | ^11.11.1 | Bibliothèque CSS-in-JS pour le styling (requis par MUI) |
+| **@emotion/styled** | ^11.11.0 | API styled-components pour Emotion |
+
+**Calendrier & Planification**
+| Bibliothèque | Version | Description |
+|--------------|---------|-------------|
+| **@fullcalendar/react** | ^6.1.20 | Composant React pour afficher des calendriers interactifs |
+| **@fullcalendar/daygrid** | ^6.1.20 | Plugin vue grille/jour pour FullCalendar |
+| **@fullcalendar/timegrid** | ^6.1.20 | Plugin vue grille temporelle pour FullCalendar |
+| **@fullcalendar/interaction** | ^6.1.20 | Plugin d'interaction (drag & drop, resize) pour FullCalendar |
+
+**Utilitaires**
+| Bibliothèque | Version | Description |
+|--------------|---------|-------------|
+| **axios** | ^1.6.2 | Client HTTP pour effectuer des requêtes API REST |
+| **dayjs** | ^1.11.19 | Bibliothèque légère pour manipuler et formater les dates |
+
+#### **Dépendances de Développement**
+| Bibliothèque | Version | Description |
+|--------------|---------|-------------|
+| **vite** | ^5.0.8 | Outil de build ultra-rapide et serveur de développement |
+| **@vitejs/plugin-react** | ^4.2.1 | Plugin officiel Vite pour le support React (Fast Refresh) |
+| **@types/react** | ^18.2.43 | Définitions TypeScript pour React |
+| **@types/react-dom** | ^18.2.17 | Définitions TypeScript pour React DOM |
+
+---
+
+### 📊 Statistiques
+
+| Catégorie | Backend | Frontend | Total |
+|-----------|---------|----------|-------|
+| **Production** | 8 | 13 | **21** |
+| **Développement** | 1 | 4 | **5** |
+| **TOTAL** | **9** | **17** | **26** |
 
 ## 🎯 Principes de Conception
 
